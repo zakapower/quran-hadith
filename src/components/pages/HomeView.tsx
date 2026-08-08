@@ -1,15 +1,17 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { fetchSurahList } from '../api/quran'
-import type { SurahMeta } from '../data/types'
-import { surahMeaningRu, surahTitleRu } from '../data/surahNamesRu'
-import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
-import { saveLastSurah, saveListScroll } from '../utils/scrollMemory'
-import { useApp } from '../context/AppContext'
+import Link from 'next/link'
+import { fetchSurahList } from '@/api/quran'
+import type { SurahMeta } from '@/data/types'
+import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
+import { useRestoreListScroll } from '@/hooks/useRestoreListScroll'
+import { saveLastSurah, saveListScroll } from '@/utils/scrollMemory'
+import { useApp } from '@/context/AppContext'
 import './List.css'
 import './Home.css'
 
-export function Home() {
+export function HomeView() {
   const { lang, t } = useApp()
   const [list, setList] = useState<SurahMeta[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -46,10 +48,10 @@ export function Home() {
             )}
           </p>
           <div className="hero__actions">
-            <Link className="btn" to="/quran">
+            <Link className="btn" href="/quran">
               {t('Открыть Коран', 'Open Qur’an')}
             </Link>
-            <Link className="btn btn--ghost" to="/hadith">
+            <Link className="btn btn--ghost" href="/hadith">
               {t('Хадисы', 'Hadith')}
             </Link>
           </div>
@@ -81,7 +83,7 @@ export function Home() {
             {list.map((s) => (
               <li key={s.number} id={`surah-${s.number}`}>
                 <Link
-                  to={`/quran/${s.number}`}
+                  href={`/quran/${s.number}`}
                   onClick={() => {
                     saveListScroll('/')
                     saveLastSurah(s.number)

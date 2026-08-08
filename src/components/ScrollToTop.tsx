@@ -1,20 +1,28 @@
+'use client'
+
 import { useLayoutEffect, useRef } from 'react'
-import { useLocation, useNavigationType } from 'react-router-dom'
+import { usePathname } from 'next/navigation'
 
 /**
- * На новых переходах (PUSH/REPLACE) поднимает страницу вверх.
+ * На новых переходах поднимает страницу вверх.
  * Возврат к спискам обрабатывают сами страницы через scrollMemory.
+ * POP (назад/вперёд) отслеживается через popstate.
  */
 export function ScrollToTop() {
-  const { pathname } = useLocation()
-  const navigationType = useNavigationType()
+  const pathname = usePathname()
   const prevPath = useRef(pathname)
   const isFirst = useRef(true)
+  const isPop = useRef(false)
 
   useLayoutEffect(() => {
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual'
     }
+    const onPopState = () => {
+      isPop.current = true
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
   useLayoutEffect(() => {
@@ -27,10 +35,12 @@ export function ScrollToTop() {
       return
     }
 
-    // Назад / вперёд — позицию восстанавливает целевая страница
-    if (navigationType === 'POP') return
+    if (isPop.current) {
+      isPop.current = false
+      return
+    }
 
-    // Возврат со суры/хадиса на список по ссылке — тоже не сбрасываем
+    // Возврат со суры/хадиса на список по ссылке — не сбрасываем
     const toList =
       (pathname === '/' ||
         pathname === '/quran' ||
@@ -40,7 +50,7 @@ export function ScrollToTop() {
     if (toList) return
 
     window.scrollTo(0, 0)
-  }, [pathname, navigationType])
+  }, [pathname])
 
   return null
 }

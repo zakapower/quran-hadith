@@ -1,11 +1,13 @@
-import { Link } from 'react-router-dom'
-import { hadithCollections } from '../data/hadithCatalog'
-import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
-import { saveLastHadith, saveListScroll } from '../utils/scrollMemory'
-import { useApp } from '../context/AppContext'
+'use client'
+
+import Link from 'next/link'
+import { hadithCollections } from '@/data/hadithCatalog'
+import { useRestoreListScroll } from '@/hooks/useRestoreListScroll'
+import { saveLastHadith, saveListScroll } from '@/utils/scrollMemory'
+import { useApp } from '@/context/AppContext'
 import './List.css'
 
-export function HadithList() {
+export function HadithListView() {
   const { lang, t } = useApp()
 
   useRestoreListScroll('/hadith', true)
@@ -26,7 +28,7 @@ export function HadithList() {
         {hadithCollections.map((b, i) => (
           <li key={b.id} id={`hadith-book-${b.id}`}>
             <Link
-              to={`/hadith/${b.id}`}
+              href={`/hadith/${b.id}`}
               onClick={() => {
                 saveListScroll('/hadith')
                 saveLastHadith(b.id)

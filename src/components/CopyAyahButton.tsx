@@ -1,3 +1,5 @@
+'use client'
+
 import { useApp } from '../context/AppContext'
 import { CopyQuoteButton } from './CopyQuoteButton'
 

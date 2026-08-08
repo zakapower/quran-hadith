@@ -1,12 +1,17 @@
+'use client'
+
 import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react'
+import { useRouter } from 'next/navigation'
+import type { Lang } from '@/data/types'
+import { LANG_COOKIE } from '@/lib/lang'
 
-export type Lang = 'ru' | 'en'
 export type Theme = 'light' | 'dark'
 
 const FONT_AR_KEY = 'qh-font-ar'
@@ -32,13 +37,14 @@ interface AppState {
 
 const AppContext = createContext<AppState | null>(null)
 
-function readStored<T extends string>(key: string, fallback: T): T {
+function readStoredTheme(): Theme {
   try {
-    const v = localStorage.getItem(key)
-    return (v as T) || fallback
+    const stored = localStorage.getItem('qh-theme')
+    if (stored === 'light' || stored === 'dark') return stored
   } catch {
-    return fallback
+    /* ignore */
   }
+  return 'light'
 }
 
 function readStoredScale(key: string): number {
@@ -61,39 +67,50 @@ function clampScale(n: number) {
   )
 }
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() =>
-    readStored<Lang>('qh-lang', 'ru'),
-  )
-  const [theme, setTheme] = useState<Theme>(() =>
-    readStored<Theme>('qh-theme', 'light'),
-  )
-  const [fontAr, setFontArState] = useState(() => readStoredScale(FONT_AR_KEY))
-  const [fontTr, setFontTrState] = useState(() => readStoredScale(FONT_TR_KEY))
+function writeLangCookie(lang: Lang) {
+  document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=31536000; samesite=lax`
+}
+
+export function AppProvider({
+  children,
+  initialLang,
+}: {
+  children: ReactNode
+  initialLang: Lang
+}) {
+  const router = useRouter()
+  const [lang, setLangState] = useState<Lang>(initialLang)
+  const [theme, setTheme] = useState<Theme>('light')
+  const [fontAr, setFontArState] = useState(FONT_SCALE_DEFAULT)
+  const [fontTr, setFontTrState] = useState(FONT_SCALE_DEFAULT)
+
+  useEffect(() => {
+    setTheme(readStoredTheme())
+    setFontArState(readStoredScale(FONT_AR_KEY))
+    setFontTrState(readStoredScale(FONT_TR_KEY))
+  }, [])
+
+  useEffect(() => {
+    setLangState(initialLang)
+  }, [initialLang])
 
   useEffect(() => {
     document.documentElement.lang = lang
-    localStorage.setItem('qh-lang', lang)
   }, [lang])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     document.documentElement.style.colorScheme = theme
-    localStorage.setItem('qh-theme', theme)
-
-    const href =
-      theme === 'dark'
-        ? '/favicon-dark.svg?v=1'
-        : '/favicon-light.svg?v=1'
-
-    let link = document.querySelector<HTMLLinkElement>("link[rel='icon']")
-    if (!link) {
-      link = document.createElement('link')
-      link.rel = 'icon'
-      link.type = 'image/svg+xml'
-      document.head.appendChild(link)
+    try {
+      localStorage.setItem('qh-theme', theme)
+    } catch {
+      /* ignore */
     }
-    link.href = href
+    const icon = document.getElementById('site-favicon') as HTMLLinkElement | null
+    if (icon) {
+      icon.href =
+        theme === 'dark' ? '/favicon-dark.svg?v=1' : '/favicon-light.svg?v=1'
+    }
   }, [theme])
 
   useEffect(() => {
@@ -108,28 +125,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [fontAr, fontTr])
 
-  const value: AppState = {
-    lang,
-    theme,
-    fontAr,
-    fontTr,
-    setLang: setLangState,
-    setFontAr: (n) => setFontArState(clampScale(n)),
-    setFontTr: (n) => setFontTrState(clampScale(n)),
-    resetFonts: () => {
-      setFontArState(FONT_SCALE_DEFAULT)
-      setFontTrState(FONT_SCALE_DEFAULT)
-    },
-    toggleLang: () => setLangState((l) => (l === 'ru' ? 'en' : 'ru')),
-    toggleTheme: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')),
-    t: (ru, en) => (lang === 'ru' ? ru : en),
-  }
+  const value = useMemo<AppState>(
+    () => ({
+      lang,
+      theme,
+      fontAr,
+      fontTr,
+      setLang: (next) => {
+        writeLangCookie(next)
+        setLangState(next)
+        router.refresh()
+      },
+      setFontAr: (n) => setFontArState(clampScale(n)),
+      setFontTr: (n) => setFontTrState(clampScale(n)),
+      resetFonts: () => {
+        setFontArState(FONT_SCALE_DEFAULT)
+        setFontTrState(FONT_SCALE_DEFAULT)
+      },
+      toggleLang: () => {
+        const next: Lang = lang === 'ru' ? 'en' : 'ru'
+        writeLangCookie(next)
+        setLangState(next)
+        router.refresh()
+      },
+      toggleTheme: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')),
+      t: (ru, en) => (lang === 'ru' ? ru : en),
+    }),
+    [lang, theme, fontAr, fontTr, router],
+  )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
 export function useApp() {
   const ctx = useContext(AppContext)
-  if (!ctx) throw new Error('useApp outside AppProvider')
+  if (!ctx) throw new Error('useApp must be used within AppProvider')
   return ctx
 }

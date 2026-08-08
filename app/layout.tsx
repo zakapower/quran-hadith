@@ -1,0 +1,60 @@
+import type { ReactNode } from 'react'
+import type { Metadata } from 'next'
+import { AppProvider } from '@/context/AppContext'
+import { Header } from '@/components/Header'
+import { OverlayScrollbar } from '@/components/OverlayScrollbar'
+import { ScrollToTop } from '@/components/ScrollToTop'
+import { getRequestLang } from '@/lib/request-lang'
+import { getSiteOrigin } from '@/lib/site'
+import './globals.css'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(getSiteOrigin()),
+}
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const lang = await getRequestLang()
+  return (
+    <html lang={lang} suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon-light.svg?v=1" id="site-favicon" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="preconnect" href="https://verses.quran.foundation" crossOrigin="" />
+        <link
+          rel="preload"
+          href="https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin=""
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var th=localStorage.getItem('qh-theme');if(th==='dark'||th==='light'){document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th;var icon=document.getElementById('site-favicon');if(icon){icon.href=th==='dark'?'/favicon-dark.svg?v=1':'/favicon-light.svg?v=1'}}else{document.documentElement.style.colorScheme='light'}}catch(e){}`,
+          }}
+        />
+      </head>
+      <body>
+        <AppProvider initialLang={lang}>
+          <ScrollToTop />
+          <OverlayScrollbar />
+          <div className="app-shell">
+            <Header />
+            <main>{children}</main>
+            <footer className="site-footer">
+              <span className="site-footer__brand">Tilāwah</span>
+              <span className="site-footer__dot" aria-hidden="true">
+                ·
+              </span>
+              <span className="site-footer__arabic">تلاوة</span>
+            </footer>
+          </div>
+        </AppProvider>
+      </body>
+    </html>
+  )
+}

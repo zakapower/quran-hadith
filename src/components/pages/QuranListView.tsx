@@ -1,21 +1,24 @@
+'use client'
+
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { fetchSurahList } from '../api/quran'
-import type { SurahMeta } from '../data/types'
-import { surahMeaningRu, surahTitleRu } from '../data/surahNamesRu'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { fetchSurahList } from '@/api/quran'
+import type { SurahMeta } from '@/data/types'
+import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import {
   ayahRefPath,
   formatAyahRef,
   parseAyahRef,
-} from '../utils/ayahRef'
-import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
-import { saveLastSurah, saveListScroll } from '../utils/scrollMemory'
-import { useApp } from '../context/AppContext'
+} from '@/utils/ayahRef'
+import { useRestoreListScroll } from '@/hooks/useRestoreListScroll'
+import { saveLastSurah, saveListScroll } from '@/utils/scrollMemory'
+import { useApp } from '@/context/AppContext'
 import './List.css'
 
-export function QuranList() {
+export function QuranListView() {
   const { lang, t } = useApp()
-  const navigate = useNavigate()
+  const router = useRouter()
   const [list, setList] = useState<SurahMeta[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -72,7 +75,7 @@ export function QuranList() {
 
   function onSearchSubmit(e: FormEvent) {
     e.preventDefault()
-    if (ayahTarget) navigate(ayahRefPath(ayahTarget.ref))
+    if (ayahTarget) router.push(ayahRefPath(ayahTarget.ref))
   }
 
   return (
@@ -125,7 +128,7 @@ export function QuranList() {
           <li>
             <Link
               className="card-list__ayah-hit"
-              to={ayahRefPath(ayahTarget.ref)}
+              href={ayahRefPath(ayahTarget.ref)}
             >
               <span className="card-list__n">
                 {formatAyahRef(ayahTarget.ref)}
@@ -161,7 +164,7 @@ export function QuranList() {
           {filtered.map((s) => (
             <li key={s.number} id={`surah-${s.number}`}>
               <Link
-                to={`/quran/${s.number}`}
+                href={`/quran/${s.number}`}
                 onClick={() => {
                   saveListScroll('/quran')
                   saveLastSurah(s.number)

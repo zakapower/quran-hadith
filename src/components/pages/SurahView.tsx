@@ -1,23 +1,26 @@
+'use client'
+
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { fetchSurah } from '../api/quran'
-import type { SurahContent } from '../data/types'
-import { surahTitleRu } from '../data/surahNamesRu'
-import { parseAyahParam } from '../utils/ayahRef'
-import { CopyAyahButton } from '../components/CopyAyahButton'
-import { ReaderSkeleton } from '../components/ReaderSkeleton'
-import { useReaderScrollMemory } from '../hooks/useReaderScrollMemory'
-import { useApp } from '../context/AppContext'
+import Link from 'next/link'
+import { useParams, useSearchParams } from 'next/navigation'
+import { fetchSurah } from '@/api/quran'
+import type { SurahContent } from '@/data/types'
+import { surahTitleRu } from '@/data/surahNamesRu'
+import { parseAyahParam } from '@/utils/ayahRef'
+import { CopyAyahButton } from '@/components/CopyAyahButton'
+import { ReaderSkeleton } from '@/components/ReaderSkeleton'
+import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
+import { useApp } from '@/context/AppContext'
 import './Reader.css'
 
-export function SurahPage() {
-  const { number } = useParams()
-  const [searchParams] = useSearchParams()
+export function SurahView() {
+  const params = useParams<{ number: string }>()
+  const searchParams = useSearchParams()
   const { lang, t } = useApp()
   const [surah, setSurah] = useState<SurahContent | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const n = Number(number)
+  const n = Number(params.number)
   const readerPath =
     Number.isFinite(n) && n >= 1 && n <= 114 ? `/quran/${n}` : null
   const title = surah
@@ -71,7 +74,7 @@ export function SurahPage() {
   return (
     <div className="reader">
       <nav className="reader__crumb">
-        <Link to="/quran">{t('Коран', 'Qur’an')}</Link>
+        <Link href="/quran">{t('Коран', 'Qur’an')}</Link>
         <span aria-hidden="true">/</span>
         <span>{title ?? '…'}</span>
       </nav>
@@ -142,12 +145,12 @@ export function SurahPage() {
 
           <nav className="reader__nav">
             {n > 1 && (
-              <Link to={`/quran/${n - 1}`}>
+              <Link href={`/quran/${n - 1}`}>
                 ← {t('Предыдущая', 'Previous')}
               </Link>
             )}
             {n < 114 && (
-              <Link to={`/quran/${n + 1}`}>
+              <Link href={`/quran/${n + 1}`}>
                 {t('Следующая', 'Next')} →
               </Link>
             )}

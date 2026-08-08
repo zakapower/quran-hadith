@@ -1,18 +1,22 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { fetchHadithSection, fetchHadithSections } from '../api/hadith'
-import { getHadithCollection } from '../data/hadithCatalog'
-import type { HadithItem } from '../data/types'
-import { CopyQuoteButton } from '../components/CopyQuoteButton'
-import { ReaderSkeleton } from '../components/ReaderSkeleton'
-import { useReaderScrollMemory } from '../hooks/useReaderScrollMemory'
-import { useApp } from '../context/AppContext'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { fetchHadithSection, fetchHadithSections } from '@/api/hadith'
+import { getHadithCollection } from '@/data/hadithCatalog'
+import type { HadithItem } from '@/data/types'
+import { CopyQuoteButton } from '@/components/CopyQuoteButton'
+import { ReaderSkeleton } from '@/components/ReaderSkeleton'
+import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
+import { useApp } from '@/context/AppContext'
 import './Reader.css'
 
-export function HadithSectionPage() {
-  const { id, sectionId } = useParams()
+export function HadithSectionView() {
+  const params = useParams<{ id: string; sectionId: string }>()
   const { lang, t } = useApp()
-  const book = id ? getHadithCollection(id) : undefined
+  const book = params.id ? getHadithCollection(params.id) : undefined
+  const sectionId = params.sectionId
   const [title, setTitle] = useState<string>('')
   const [hadiths, setHadiths] = useState<HadithItem[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -53,7 +57,7 @@ export function HadithSectionPage() {
     return (
       <div className="reader">
         <h1>{t('Не найдено', 'Not found')}</h1>
-        <Link to="/hadith">{t('К хадисам', 'Back to hadith')}</Link>
+        <Link href="/hadith">{t('К хадисам', 'Back to hadith')}</Link>
       </div>
     )
   }
@@ -61,9 +65,9 @@ export function HadithSectionPage() {
   return (
     <div className="reader">
       <nav className="reader__crumb">
-        <Link to="/hadith">{t('Хадисы', 'Hadith')}</Link>
+        <Link href="/hadith">{t('Хадисы', 'Hadith')}</Link>
         <span aria-hidden="true">/</span>
-        <Link to={`/hadith/${book.id}`}>{book.title[lang]}</Link>
+        <Link href={`/hadith/${book.id}`}>{book.title[lang]}</Link>
         <span aria-hidden="true">/</span>
         <span>{title || '…'}</span>
       </nav>

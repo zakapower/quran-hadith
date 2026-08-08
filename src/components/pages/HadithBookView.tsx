@@ -1,19 +1,22 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { fetchHadithSections } from '../api/hadith'
-import { getHadithCollection } from '../data/hadithCatalog'
-import type { HadithSectionMeta } from '../data/types'
-import { ReaderSkeleton } from '../components/ReaderSkeleton'
-import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
-import { saveLastHadith, saveListScroll } from '../utils/scrollMemory'
-import { useApp } from '../context/AppContext'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { fetchHadithSections } from '@/api/hadith'
+import { getHadithCollection } from '@/data/hadithCatalog'
+import type { HadithSectionMeta } from '@/data/types'
+import { ReaderSkeleton } from '@/components/ReaderSkeleton'
+import { useRestoreListScroll } from '@/hooks/useRestoreListScroll'
+import { saveLastHadith, saveListScroll } from '@/utils/scrollMemory'
+import { useApp } from '@/context/AppContext'
 import './List.css'
 import './Reader.css'
 
-export function HadithBookPage() {
-  const { id } = useParams()
+export function HadithBookView() {
+  const params = useParams<{ id: string }>()
   const { lang, t } = useApp()
-  const book = id ? getHadithCollection(id) : undefined
+  const book = params.id ? getHadithCollection(params.id) : undefined
   const [sections, setSections] = useState<HadithSectionMeta[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const listPath = book ? `/hadith/${book.id}` : ''
@@ -46,7 +49,7 @@ export function HadithBookPage() {
     return (
       <div className="reader">
         <h1>{t('Не найдено', 'Not found')}</h1>
-        <Link to="/hadith">{t('К хадисам', 'Back to hadith')}</Link>
+        <Link href="/hadith">{t('К хадисам', 'Back to hadith')}</Link>
       </div>
     )
   }
@@ -54,7 +57,7 @@ export function HadithBookPage() {
   return (
     <div className="list-page">
       <nav className="reader__crumb">
-        <Link to="/hadith">{t('Хадисы', 'Hadith')}</Link>
+        <Link href="/hadith">{t('Хадисы', 'Hadith')}</Link>
         <span aria-hidden="true">/</span>
         <span>{book.title[lang]}</span>
       </nav>
@@ -85,7 +88,7 @@ export function HadithBookPage() {
           {sections.map((s) => (
             <li key={s.id} id={`hadith-section-${book.id}-${s.id}`}>
               <Link
-                to={`/hadith/${book.id}/${s.id}`}
+                href={`/hadith/${book.id}/${s.id}`}
                 onClick={() => {
                   saveListScroll(`/hadith/${book.id}`)
                   saveLastHadith(book.id, s.id)

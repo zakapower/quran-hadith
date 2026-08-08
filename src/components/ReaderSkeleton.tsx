@@ -1,3 +1,5 @@
+'use client'
+
 import './ReaderSkeleton.css'
 
 type ReaderSkeletonVariant = 'surah' | 'hadith' | 'chapters'
