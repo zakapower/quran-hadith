@@ -11,7 +11,7 @@ export type Theme = 'light' | 'dark'
 
 const FONT_AR_KEY = 'qh-font-ar'
 const FONT_TR_KEY = 'qh-font-tr'
-export const FONT_SCALE_MIN = 0.85
+export const FONT_SCALE_MIN = 0.7
 export const FONT_SCALE_MAX = 1.4
 export const FONT_SCALE_STEP = 0.05
 export const FONT_SCALE_DEFAULT = 1

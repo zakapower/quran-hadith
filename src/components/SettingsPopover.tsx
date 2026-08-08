@@ -40,7 +40,7 @@ export function SettingsPopover() {
     <div className="settings" ref={rootRef}>
       <button
         type="button"
-        className={`ctrl${open ? ' ctrl--active' : ''}`}
+        className={`ctrl${open ? ' ctrl--open' : ''}`}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="dialog"
@@ -48,7 +48,9 @@ export function SettingsPopover() {
         aria-label={t('Настройки', 'Settings')}
         title={t('Настройки', 'Settings')}
       >
-        <Settings className="ctrl__gear" strokeWidth={2} aria-hidden="true" />
+        <span className="ctrl__stack" aria-hidden="true">
+          <Settings className="ctrl__gear" strokeWidth={2} />
+        </span>
       </button>
 
       {open && (

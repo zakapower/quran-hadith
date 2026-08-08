@@ -2,21 +2,36 @@
   position: relative;
 }
 
+.settings .ctrl__stack {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
 .ctrl__gear {
+  position: absolute;
+  inset: 0;
   width: 1.15rem;
   height: 1.15rem;
   display: block;
-  transition: transform 0.28s ease;
+  transform-origin: 50% 50%;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.22s ease;
 }
 
-.ctrl--active .ctrl__gear {
-  transform: rotate(45deg);
-  color: var(--accent);
+.settings .ctrl:hover .ctrl__gear {
+  transform: rotate(30deg);
 }
 
-.ctrl--active {
+.settings .ctrl--open {
   color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
+.settings .ctrl--open .ctrl__gear,
+.settings .ctrl--open:hover .ctrl__gear {
+  transform: rotate(90deg);
+  color: var(--accent);
 }
 
 .settings__panel {
@@ -122,7 +137,9 @@
     transition: none;
   }
 
-  .ctrl--active .ctrl__gear {
+  .settings .ctrl:hover .ctrl__gear,
+  .settings .ctrl--open .ctrl__gear,
+  .settings .ctrl--open:hover .ctrl__gear {
     transform: none;
   }
 }
