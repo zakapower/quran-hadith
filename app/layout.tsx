@@ -10,6 +10,8 @@ import './globals.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
+  // Managed at runtime (theme); keep Next from injecting a fixed icon.
+  icons: {},
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -17,7 +19,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon-light.svg?v=1" id="site-favicon" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="preconnect" href="https://verses.quran.foundation" crossOrigin="" />
@@ -34,7 +35,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var th=localStorage.getItem('qh-theme');if(th==='dark'||th==='light'){document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th;var icon=document.getElementById('site-favicon');if(icon){icon.href=th==='dark'?'/favicon-dark.svg?v=1':'/favicon-light.svg?v=1'}}else{document.documentElement.style.colorScheme='light'}}catch(e){}`,
+            __html: `(function(){try{var th=localStorage.getItem('qh-theme');if(th!=='dark'&&th!=='light'){document.documentElement.style.colorScheme='light';th='light'}else{document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th}var href=th==='dark'?'/favicon-dark.svg?v=5':'/favicon-light.svg?v=5';document.querySelectorAll("link[rel='icon'],link[rel='shortcut icon']").forEach(function(n){n.remove()});var link=document.createElement('link');link.id='site-favicon';link.rel='icon';link.type='image/svg+xml';link.href=href;document.head.appendChild(link)}catch(e){}})()`,
           }}
         />
       </head>

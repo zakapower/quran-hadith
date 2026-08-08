@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { HomeView } from '@/components/pages/HomeView'
+import { getSurahList } from '@/data/surahList'
 import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageAlternatesMetadataBase } from '@/lib/site'
 
@@ -24,5 +25,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function HomePage() {
-  return <HomeView />
+  return <HomeView surahs={getSurahList()} />
 }

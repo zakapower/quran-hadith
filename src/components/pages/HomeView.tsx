@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { fetchSurahList } from '@/api/quran'
 import type { SurahMeta } from '@/data/types'
 import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import { useRestoreListScroll } from '@/hooks/useRestoreListScroll'
@@ -11,26 +9,10 @@ import { useApp } from '@/context/AppContext'
 import './List.css'
 import './Home.css'
 
-export function HomeView() {
+export function HomeView({ surahs }: { surahs: SurahMeta[] }) {
   const { lang, t } = useApp()
-  const [list, setList] = useState<SurahMeta[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let cancelled = false
-    fetchSurahList()
-      .then((data) => {
-        if (!cancelled) setList(data)
-      })
-      .catch(() => {
-        if (!cancelled) setError('load-failed')
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useRestoreListScroll('/', Boolean(list))
+  useRestoreListScroll('/', true)
 
   return (
     <div className="home">
@@ -69,50 +51,39 @@ export function HomeView() {
           </p>
         </header>
 
-        {error && (
-          <p className="home-surahs__status">
-            {t('Не удалось загрузить список сур', 'Could not load surah list')}
-          </p>
-        )}
-        {!list && !error && (
-          <p className="home-surahs__status">{t('Загрузка…', 'Loading…')}</p>
-        )}
-
-        {list && (
-          <ol className="card-list card-list--cols">
-            {list.map((s) => (
-              <li key={s.number} id={`surah-${s.number}`}>
-                <Link
-                  href={`/quran/${s.number}`}
-                  onClick={() => {
-                    saveListScroll('/')
-                    saveLastSurah(s.number)
-                  }}
-                >
-                  <span className="card-list__n">
-                    {String(s.number).padStart(2, '0')}
-                  </span>
-                  <span className="card-list__body">
-                    <strong>
-                      {lang === 'ru'
-                        ? surahTitleRu(s.number, s.englishName)
-                        : s.englishName}
-                      <span className="card-list__ar" dir="rtl">
-                        {s.name}
-                      </span>
-                    </strong>
-                    <span className="card-list__meta">
-                      {lang === 'ru'
-                        ? surahMeaningRu(s.number, s.englishNameTranslation)
-                        : s.englishNameTranslation}{' '}
-                      · {s.numberOfAyahs} {t('аятов', 'ayahs')}
+        <ol className="card-list card-list--cols">
+          {surahs.map((s) => (
+            <li key={s.number} id={`surah-${s.number}`}>
+              <Link
+                href={`/quran/${s.number}`}
+                onClick={() => {
+                  saveListScroll('/')
+                  saveLastSurah(s.number)
+                }}
+              >
+                <span className="card-list__n">
+                  {String(s.number).padStart(2, '0')}
+                </span>
+                <span className="card-list__body">
+                  <strong>
+                    {lang === 'ru'
+                      ? surahTitleRu(s.number, s.englishName)
+                      : s.englishName}
+                    <span className="card-list__ar" dir="rtl">
+                      {s.name}
                     </span>
+                  </strong>
+                  <span className="card-list__meta">
+                    {lang === 'ru'
+                      ? surahMeaningRu(s.number, s.englishNameTranslation)
+                      : s.englishNameTranslation}{' '}
+                    · {s.numberOfAyahs} {t('аятов', 'ayahs')}
                   </span>
-                </Link>
-              </li>
-            ))}
-          </ol>
-        )}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
       </section>
     </div>
   )

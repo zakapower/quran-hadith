@@ -71,6 +71,26 @@ function writeLangCookie(lang: Lang) {
   document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=31536000; samesite=lax`
 }
 
+const FAVICON_V = '5'
+
+function applySiteFavicon(theme: Theme) {
+  const href =
+    theme === 'dark'
+      ? `/favicon-dark.svg?v=${FAVICON_V}`
+      : `/favicon-light.svg?v=${FAVICON_V}`
+
+  document
+    .querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
+    .forEach((node) => node.remove())
+
+  const link = document.createElement('link')
+  link.id = 'site-favicon'
+  link.rel = 'icon'
+  link.type = 'image/svg+xml'
+  link.href = `${href}&t=${Date.now()}`
+  document.head.appendChild(link)
+}
+
 export function AppProvider({
   children,
   initialLang,
@@ -81,11 +101,13 @@ export function AppProvider({
   const router = useRouter()
   const [lang, setLangState] = useState<Lang>(initialLang)
   const [theme, setTheme] = useState<Theme>('light')
+  const [themeReady, setThemeReady] = useState(false)
   const [fontAr, setFontArState] = useState(FONT_SCALE_DEFAULT)
   const [fontTr, setFontTrState] = useState(FONT_SCALE_DEFAULT)
 
   useEffect(() => {
     setTheme(readStoredTheme())
+    setThemeReady(true)
     setFontArState(readStoredScale(FONT_AR_KEY))
     setFontTrState(readStoredScale(FONT_TR_KEY))
   }, [])
@@ -99,6 +121,7 @@ export function AppProvider({
   }, [lang])
 
   useEffect(() => {
+    if (!themeReady) return
     document.documentElement.setAttribute('data-theme', theme)
     document.documentElement.style.colorScheme = theme
     try {
@@ -106,12 +129,8 @@ export function AppProvider({
     } catch {
       /* ignore */
     }
-    const icon = document.getElementById('site-favicon') as HTMLLinkElement | null
-    if (icon) {
-      icon.href =
-        theme === 'dark' ? '/favicon-dark.svg?v=1' : '/favicon-light.svg?v=1'
-    }
-  }, [theme])
+    applySiteFavicon(theme)
+  }, [theme, themeReady])
 
   useEffect(() => {
     const root = document.documentElement

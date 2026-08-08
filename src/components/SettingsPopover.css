@@ -38,7 +38,6 @@
   border-radius: 0.65rem;
   background: var(--surface);
   box-shadow: 0 12px 28px color-mix(in srgb, var(--ink) 12%, transparent);
-  animation: in 0.45s ease both;
 }
 
 .settings__title {
@@ -96,10 +95,6 @@
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    opacity 0.15s ease;
 }
 
 .settings__reset:hover:not(:disabled) {
@@ -112,21 +107,8 @@
   cursor: default;
 }
 
-@keyframes in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .ctrl__gear,
-  .settings__panel {
-    animation: none;
+  .ctrl__gear {
     transition: none;
   }
 

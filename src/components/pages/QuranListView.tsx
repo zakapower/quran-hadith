@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { fetchSurahList } from '@/api/quran'
 import type { SurahMeta } from '@/data/types'
 import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import {
@@ -16,34 +15,18 @@ import { saveLastSurah, saveListScroll } from '@/utils/scrollMemory'
 import { useApp } from '@/context/AppContext'
 import './List.css'
 
-export function QuranListView() {
+export function QuranListView({ surahs }: { surahs: SurahMeta[] }) {
   const { lang, t } = useApp()
   const router = useRouter()
-  const [list, setList] = useState<SurahMeta[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
 
-  useEffect(() => {
-    let cancelled = false
-    fetchSurahList()
-      .then((data) => {
-        if (!cancelled) setList(data)
-      })
-      .catch(() => {
-        if (!cancelled) setError('load-failed')
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useRestoreListScroll('/quran', Boolean(list) && !query.trim())
+  useRestoreListScroll('/quran', !query.trim())
 
   const ayahRef = useMemo(() => parseAyahRef(query), [query])
 
   const ayahTarget = useMemo(() => {
-    if (!list || !ayahRef) return null
-    const surah = list.find((s) => s.number === ayahRef.surah)
+    if (!ayahRef) return null
+    const surah = surahs.find((s) => s.number === ayahRef.surah)
     if (!surah) return null
     if (ayahRef.from > surah.numberOfAyahs) return null
     const to = Math.min(ayahRef.to, surah.numberOfAyahs)
@@ -52,14 +35,13 @@ export function QuranListView() {
       ref: { ...ayahRef, to },
       clipped: to !== ayahRef.to,
     }
-  }, [list, ayahRef])
+  }, [surahs, ayahRef])
 
   const filtered = useMemo(() => {
-    if (!list) return []
     if (ayahTarget) return []
     const q = query.trim().toLowerCase()
-    if (!q) return list
-    return list.filter((s) => {
+    if (!q) return surahs
+    return surahs.filter((s) => {
       const ruName = surahTitleRu(s.number, '').toLowerCase()
       const ruMeaning = surahMeaningRu(s.number, '').toLowerCase()
       return (
@@ -71,7 +53,7 @@ export function QuranListView() {
         s.name.includes(query.trim())
       )
     })
-  }, [list, query, ayahTarget])
+  }, [surahs, query, ayahTarget])
 
   function onSearchSubmit(e: FormEvent) {
     e.preventDefault()
@@ -105,16 +87,7 @@ export function QuranListView() {
         </form>
       </header>
 
-      {error && (
-        <p className="list-page__status">
-          {t('Не удалось загрузить список сур', 'Could not load surah list')}
-        </p>
-      )}
-      {!list && !error && (
-        <p className="list-page__status">{t('Загрузка…', 'Loading…')}</p>
-      )}
-
-      {list && ayahRef && !ayahTarget && (
+      {ayahRef && !ayahTarget && (
         <p className="list-page__status">
           {t(
             'Аят не найден. Проверь номер суры и аята.',
@@ -123,7 +96,7 @@ export function QuranListView() {
         </p>
       )}
 
-      {list && ayahTarget && (
+      {ayahTarget && (
         <ol className="card-list">
           <li>
             <Link
@@ -159,7 +132,7 @@ export function QuranListView() {
         </ol>
       )}
 
-      {list && !ayahTarget && (
+      {!ayahTarget && (
         <ol className="card-list">
           {filtered.map((s) => (
             <li key={s.number} id={`surah-${s.number}`}>

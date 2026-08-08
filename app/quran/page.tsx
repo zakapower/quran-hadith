@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { QuranListView } from '@/components/pages/QuranListView'
+import { getSurahList } from '@/data/surahList'
 import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates } from '@/lib/site'
 
@@ -20,5 +21,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function QuranPage() {
-  return <QuranListView />
+  return <QuranListView surahs={getSurahList()} />
 }

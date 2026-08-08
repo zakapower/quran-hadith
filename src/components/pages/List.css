@@ -53,6 +53,38 @@
   gap: 0.55rem;
 }
 
+.card-list li {
+  animation: filter-in 0.32s ease both;
+}
+
+.card-list li:nth-child(1) {
+  animation-delay: 0ms;
+}
+.card-list li:nth-child(2) {
+  animation-delay: 30ms;
+}
+.card-list li:nth-child(3) {
+  animation-delay: 60ms;
+}
+.card-list li:nth-child(4) {
+  animation-delay: 90ms;
+}
+.card-list li:nth-child(5) {
+  animation-delay: 120ms;
+}
+.card-list li:nth-child(6) {
+  animation-delay: 150ms;
+}
+.card-list li:nth-child(7) {
+  animation-delay: 180ms;
+}
+.card-list li:nth-child(8) {
+  animation-delay: 210ms;
+}
+.card-list li:nth-child(n + 9) {
+  animation-delay: 240ms;
+}
+
 .card-list li a {
   display: grid;
   grid-template-columns: 2.5rem 1fr;
@@ -129,3 +161,22 @@
     transform: translateY(0);
   }
 }
+
+@keyframes filter-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-page,
+  .card-list li {
+    animation: none;
+  }
+}
+

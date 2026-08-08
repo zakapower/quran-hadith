@@ -1,6 +1,6 @@
 import type { Ayah, SurahContent, SurahMeta } from '../data/types'
+import { getSurahList, getSurahMeta } from '../data/surahList'
 
-const CLOUD = 'https://api.alquran.cloud/v1'
 const CDN = 'https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions'
 
 const ARABIC_EDITION = 'ara-quranuthmanihaf'
@@ -9,7 +9,6 @@ const TRANSLATION = {
   en: 'eng-ummmuhammad',
 } as const
 
-let listCache: SurahMeta[] | null = null
 const surahCache = new Map<string, SurahContent>()
 
 type CdnChapter = {
@@ -35,12 +34,7 @@ async function fetchCdnChapter(edition: string, number: number) {
 }
 
 export async function fetchSurahList(): Promise<SurahMeta[]> {
-  if (listCache) return listCache
-  const res = await fetch(`${CLOUD}/surah`)
-  if (!res.ok) throw new Error('Failed to load surah list')
-  const data = await res.json()
-  listCache = data.data as SurahMeta[]
-  return listCache
+  return getSurahList()
 }
 
 export async function fetchSurah(
@@ -51,15 +45,14 @@ export async function fetchSurah(
   const cached = surahCache.get(key)
   if (cached) return cached
 
+  const meta = getSurahMeta(number)
+  if (!meta) throw new Error('Surah not found')
+
   const translationEdition = TRANSLATION[lang]
-  const [metaList, arabic, translation] = await Promise.all([
-    fetchSurahList(),
+  const [arabic, translation] = await Promise.all([
     fetchCdnChapter(ARABIC_EDITION, number),
     fetchCdnChapter(translationEdition, number),
   ])
-
-  const meta = metaList.find((s) => s.number === number)
-  if (!meta) throw new Error('Surah not found')
 
   const content: SurahContent = {
     number: meta.number,
