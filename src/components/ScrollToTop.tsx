@@ -1,8 +1,10 @@
 import { useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
-const scrollPositions = new Map<string, number>()
-
+/**
+ * На новых переходах (PUSH/REPLACE) поднимает страницу вверх.
+ * Возврат к спискам обрабатывают сами страницы через scrollMemory.
+ */
 export function ScrollToTop() {
   const { pathname } = useLocation()
   const navigationType = useNavigationType()
@@ -16,14 +18,6 @@ export function ScrollToTop() {
   }, [])
 
   useLayoutEffect(() => {
-    const onScroll = () => {
-      scrollPositions.set(pathname, window.scrollY)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [pathname])
-
-  useLayoutEffect(() => {
     const from = prevPath.current
     prevPath.current = pathname
 
@@ -33,21 +27,17 @@ export function ScrollToTop() {
       return
     }
 
-    const backToList =
-      (pathname === '/quran' || pathname === '/hadith') &&
-      (navigationType === 'POP' ||
-        from.startsWith('/quran/') ||
-        from.startsWith('/hadith/'))
+    // Назад / вперёд — позицию восстанавливает целевая страница
+    if (navigationType === 'POP') return
 
-    if (backToList) {
-      window.scrollTo(0, scrollPositions.get(pathname) ?? 0)
-      return
-    }
-
-    if (navigationType === 'POP') {
-      window.scrollTo(0, scrollPositions.get(pathname) ?? 0)
-      return
-    }
+    // Возврат со суры/хадиса на список по ссылке — тоже не сбрасываем
+    const toList =
+      (pathname === '/' ||
+        pathname === '/quran' ||
+        pathname === '/hadith' ||
+        /^\/hadith\/[^/]+$/.test(pathname)) &&
+      (from.startsWith('/quran/') || from.startsWith('/hadith/'))
+    if (toList) return
 
     window.scrollTo(0, 0)
   }, [pathname, navigationType])

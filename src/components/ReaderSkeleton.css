@@ -1,0 +1,163 @@
+.reader-skel {
+  margin-top: 0.25rem;
+}
+
+.reader-skel__head {
+  margin-bottom: 1.75rem;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+}
+
+.reader-skel__list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.reader-skel--chapters .reader-skel__list {
+  gap: 0.55rem;
+  margin-top: 0.25rem;
+}
+
+.reader-skel__bone {
+  border-radius: 0.4rem;
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--wash) 88%, var(--line)) 0%,
+    color-mix(in srgb, var(--surface) 70%, var(--wash)) 42%,
+    color-mix(in srgb, var(--wash) 88%, var(--line)) 78%
+  );
+  background-size: 220% 100%;
+  animation: reader-skel-shimmer 1.55s ease-in-out infinite;
+}
+
+.reader-skel__ar-title {
+  width: min(14rem, 68%);
+  height: clamp(1.8rem, 5vw, 2.4rem);
+  border-radius: 0.55rem;
+  margin-bottom: 0.1rem;
+}
+
+.reader-skel__title {
+  width: min(16rem, 72%);
+  height: clamp(1.4rem, 3.5vw, 1.85rem);
+}
+
+.reader-skel--surah .reader-skel__title {
+  width: min(12rem, 58%);
+}
+
+.reader-skel__sub {
+  width: min(9rem, 40%);
+  height: 0.85rem;
+  opacity: 0.85;
+}
+
+.reader-skel__card {
+  padding: 1.1rem 1.1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  display: grid;
+  gap: 0.55rem;
+}
+
+.reader-skel__card--ayah {
+  gap: 0;
+}
+
+.reader-skel__card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+}
+
+.reader-skel__badge {
+  width: 1.15rem;
+  height: 0.8rem;
+}
+
+.reader-skel__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+}
+
+.reader-skel__ayah-ar {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: end;
+  margin-bottom: 0.75rem;
+}
+
+.reader-skel__line {
+  height: 0.95rem;
+  max-width: 100%;
+}
+
+.reader-skel__line--sm {
+  height: 0.8rem;
+  opacity: 0.9;
+}
+
+.reader-skel__line--ar {
+  height: clamp(1.35rem, 3.2vw, 1.65rem);
+  border-radius: 0.45rem;
+}
+
+.reader-skel__line--tr {
+  height: 1.02rem;
+  opacity: 0.88;
+}
+
+.reader-skel__chapter {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--surface);
+}
+
+.reader-skel__num {
+  width: 1.5rem;
+  height: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.reader-skel__chapter-body {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 0.1rem;
+}
+
+.reader-skel__chapter-body .reader-skel__line {
+  height: 1rem;
+}
+
+@keyframes reader-skel-shimmer {
+  0% {
+    background-position: 100% 0;
+    opacity: 0.72;
+  }
+  50% {
+    background-position: 0% 0;
+    opacity: 1;
+  }
+  100% {
+    background-position: 100% 0;
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-skel__bone {
+    animation: none;
+    background: color-mix(in srgb, var(--wash) 75%, var(--line));
+    opacity: 0.85;
+  }
+}

@@ -8,6 +8,8 @@ import {
   formatAyahRef,
   parseAyahRef,
 } from '../utils/ayahRef'
+import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
+import { saveLastSurah, saveListScroll } from '../utils/scrollMemory'
 import { useApp } from '../context/AppContext'
 import './List.css'
 
@@ -31,6 +33,8 @@ export function QuranList() {
       cancelled = true
     }
   }, [])
+
+  useRestoreListScroll('/quran', Boolean(list) && !query.trim())
 
   const ayahRef = useMemo(() => parseAyahRef(query), [query])
 
@@ -155,8 +159,14 @@ export function QuranList() {
       {list && !ayahTarget && (
         <ol className="card-list">
           {filtered.map((s) => (
-            <li key={s.number}>
-              <Link to={`/quran/${s.number}`}>
+            <li key={s.number} id={`surah-${s.number}`}>
+              <Link
+                to={`/quran/${s.number}`}
+                onClick={() => {
+                  saveListScroll('/quran')
+                  saveLastSurah(s.number)
+                }}
+              >
                 <span className="card-list__n">
                   {String(s.number).padStart(2, '0')}
                 </span>

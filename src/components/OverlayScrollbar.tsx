@@ -9,25 +9,39 @@ const STEP = 72
 export function OverlayScrollbar() {
   const [needed, setNeeded] = useState(false)
   const [active, setActive] = useState(false)
-  const [thumbTop, setThumbTop] = useState(ARROW)
-  const [thumbHeight, setThumbHeight] = useState(MIN_THUMB)
+  const railRef = useRef<HTMLDivElement>(null)
+  const thumbRef = useRef<HTMLButtonElement>(null)
   const hideTimer = useRef(0)
+  const raf = useRef(0)
   const drag = useRef<{ startY: number; startTop: number } | null>(null)
   const hovering = useRef(false)
   const holdTimer = useRef(0)
   const holdInterval = useRef(0)
-  const metrics = useRef({ view: 0, total: 0, thumbHeight: MIN_THUMB })
+  const metrics = useRef({
+    view: 0,
+    total: 0,
+    thumbHeight: MIN_THUMB,
+    thumbTop: ARROW,
+  })
 
   useEffect(() => {
     const root = document.documentElement
 
-    function measure() {
+    function applyThumb(top: number, height: number) {
+      const thumb = thumbRef.current
+      if (!thumb) return
+      thumb.style.top = `${top}px`
+      thumb.style.height = `${height}px`
+    }
+
+    function measure(updateNeeded = false) {
       const view = root.clientHeight
       const total = root.scrollHeight
       const canScroll = total > view + 1
-      setNeeded(canScroll)
       metrics.current.view = view
       metrics.current.total = total
+
+      if (updateNeeded) setNeeded(canScroll)
 
       if (!canScroll) {
         setActive(false)
@@ -44,8 +58,8 @@ export function OverlayScrollbar() {
           : ARROW + Math.round((root.scrollTop / (total - view)) * maxTop)
 
       metrics.current.thumbHeight = height
-      setThumbHeight(height)
-      setThumbTop(Math.min(ARROW + maxTop, Math.max(ARROW, top)))
+      metrics.current.thumbTop = Math.min(ARROW + maxTop, Math.max(ARROW, top))
+      applyThumb(metrics.current.thumbTop, height)
     }
 
     function scheduleHide() {
@@ -56,26 +70,35 @@ export function OverlayScrollbar() {
     }
 
     function show() {
-      setActive(true)
+      setActive((v) => (v ? v : true))
       scheduleHide()
     }
 
     function onScroll() {
-      measure()
-      show()
+      if (raf.current) return
+      raf.current = window.requestAnimationFrame(() => {
+        raf.current = 0
+        measure(false)
+        show()
+      })
     }
 
-    measure()
+    measure(true)
+
+    function onResize() {
+      measure(true)
+    }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', measure)
-    const ro = new ResizeObserver(measure)
+    window.addEventListener('resize', onResize)
+    const ro = new ResizeObserver(onResize)
     ro.observe(document.body)
 
     return () => {
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', measure)
+      window.removeEventListener('resize', onResize)
       ro.disconnect()
+      window.cancelAnimationFrame(raf.current)
       window.clearTimeout(hideTimer.current)
       window.clearTimeout(holdTimer.current)
       window.clearInterval(holdInterval.current)
@@ -83,9 +106,16 @@ export function OverlayScrollbar() {
   }, [])
 
   useEffect(() => {
+    if (!needed) return
+    const root = document.documentElement
+    const thumb = thumbRef.current
+    if (thumb) {
+      thumb.style.top = `${metrics.current.thumbTop}px`
+      thumb.style.height = `${metrics.current.thumbHeight}px`
+    }
+
     function onMove(e: PointerEvent) {
       if (!drag.current) return
-      const root = document.documentElement
       const { view, total } = metrics.current
       const height = metrics.current.thumbHeight
       const track = Math.max(0, view - ARROW * 2)
@@ -97,7 +127,8 @@ export function OverlayScrollbar() {
           drag.current.startTop + (e.clientY - drag.current.startY),
         ),
       )
-      setThumbTop(nextTop)
+      metrics.current.thumbTop = nextTop
+      if (thumbRef.current) thumbRef.current.style.top = `${nextTop}px`
       const maxScroll = total - view
       root.scrollTop =
         maxTop === 0 ? 0 : ((nextTop - ARROW) / maxTop) * maxScroll
@@ -121,7 +152,7 @@ export function OverlayScrollbar() {
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
     }
-  }, [])
+  }, [needed])
 
   function scrollByStep(delta: number) {
     document.documentElement.scrollBy({ top: delta, behavior: 'auto' })
@@ -150,6 +181,7 @@ export function OverlayScrollbar() {
 
   return (
     <div
+      ref={railRef}
       className={
         active
           ? 'overlay-scrollbar overlay-scrollbar--active'
@@ -180,13 +212,16 @@ export function OverlayScrollbar() {
         onPointerCancel={stopHold}
       />
       <button
+        ref={thumbRef}
         type="button"
         className="overlay-scrollbar__thumb"
-        style={{ top: thumbTop, height: thumbHeight }}
         tabIndex={-1}
         onPointerDown={(e) => {
           e.preventDefault()
-          drag.current = { startY: e.clientY, startTop: thumbTop }
+          drag.current = {
+            startY: e.clientY,
+            startTop: metrics.current.thumbTop,
+          }
           document.body.classList.add('is-overlay-dragging')
           setActive(true)
           window.clearTimeout(hideTimer.current)

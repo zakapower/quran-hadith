@@ -3,7 +3,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 18px;
+  width: 12px;
   z-index: 80;
   pointer-events: auto;
 }
@@ -25,8 +25,9 @@
 
 .overlay-scrollbar__arrow {
   position: absolute;
-  left: 50%;
-  width: 16px;
+  right: 0;
+  left: auto;
+  width: 12px;
   height: 18px;
   margin: 0;
   padding: 0;
@@ -35,7 +36,7 @@
   background: transparent;
   color: color-mix(in srgb, var(--muted) 80%, transparent);
   cursor: pointer;
-  transform: translateX(-50%) scaleX(0.85);
+  transform: scaleX(0.85);
   transform-origin: center center;
   display: inline-flex;
   align-items: center;
@@ -43,7 +44,7 @@
 }
 
 .overlay-scrollbar--active .overlay-scrollbar__arrow {
-  transform: translateX(-50%) scaleX(1);
+  transform: scaleX(1);
 }
 
 .overlay-scrollbar__arrow::before {
@@ -81,7 +82,8 @@
 
 .overlay-scrollbar__thumb {
   position: absolute;
-  left: 50%;
+  right: 2px;
+  left: auto;
   width: 8px;
   margin: 0;
   padding: 0;
@@ -89,12 +91,12 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--muted) 55%, transparent);
   cursor: grab;
-  transform: translateX(-50%) scaleX(0.85);
+  transform: scaleX(0.85);
   transform-origin: center center;
 }
 
 .overlay-scrollbar--active .overlay-scrollbar__thumb {
-  transform: translateX(-50%) scaleX(1);
+  transform: scaleX(1);
 }
 
 .overlay-scrollbar__thumb:hover {
@@ -114,12 +116,12 @@ body.is-overlay-dragging .overlay-scrollbar__arrow {
 
 body.is-overlay-dragging .overlay-scrollbar__thumb {
   cursor: grabbing;
-  transform: translateX(-50%) scaleX(1);
+  transform: scaleX(1);
   background: color-mix(in srgb, var(--accent) 70%, var(--muted));
 }
 
 body.is-overlay-dragging .overlay-scrollbar__arrow {
-  transform: translateX(-50%) scaleX(1);
+  transform: scaleX(1);
 }
 
 @media (prefers-reduced-motion: reduce) {

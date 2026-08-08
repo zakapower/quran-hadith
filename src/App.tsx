@@ -8,6 +8,7 @@ import { QuranList } from './pages/QuranList'
 import { SurahPage } from './pages/SurahPage'
 import { HadithList } from './pages/HadithList'
 import { HadithBookPage } from './pages/HadithBookPage'
+import { HadithSectionPage } from './pages/HadithSectionPage'
 import './index.css'
 
 export default function App() {
@@ -25,6 +26,10 @@ export default function App() {
               <Route path="/quran/:number" element={<SurahPage />} />
               <Route path="/hadith" element={<HadithList />} />
               <Route path="/hadith/:id" element={<HadithBookPage />} />
+              <Route
+                path="/hadith/:id/:sectionId"
+                element={<HadithSectionPage />}
+              />
             </Routes>
           </main>
           <footer className="site-footer">

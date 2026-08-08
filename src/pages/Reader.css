@@ -100,7 +100,6 @@
   transition:
     color 0.22s ease,
     border-color 0.22s ease,
-    background-color 0.22s ease,
     transform 0.22s ease,
     box-shadow 0.22s ease;
 }
@@ -183,7 +182,9 @@
 .ayah__ar {
   margin: 0 0 0.75rem;
   font-family: var(--font-arabic);
-  font-size: clamp(1.35rem, 3.2vw, 1.65rem);
+  font-size: calc(
+    clamp(1.35rem, 3.2vw, 1.65rem) * var(--reader-ar-scale, 1)
+  );
   line-height: 1.9;
   color: var(--ink);
 }
@@ -191,7 +192,7 @@
 .ayah__tr {
   margin: 0;
   color: var(--muted);
-  font-size: 1.02rem;
+  font-size: calc(1.02rem * var(--reader-tr-scale, 1));
   line-height: 1.55;
 }
 

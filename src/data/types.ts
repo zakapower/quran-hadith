@@ -23,16 +23,34 @@ export interface SurahContent {
   ayahsTranslation: Ayah[]
 }
 
+export interface HadithCollectionMeta {
+  id: string
+  title: { ru: string; en: string }
+  narrator: { ru: string; en: string }
+  /** CDN book key: bukhari | muslim */
+  apiBook: 'bukhari' | 'muslim'
+  /** Число хадисов в издании CDN (для списка без лишнего запроса) */
+  hadithCount: number
+  editions: {
+    ar: string
+    en: string
+    ru?: string
+  }
+}
+
+export interface HadithSectionMeta {
+  id: string
+  number: number
+  name: string
+  hadithFirst: number
+  hadithLast: number
+  count: number
+}
+
 export interface HadithItem {
   id: string
   number: number
   arabic?: string
-  text: { ru: string; en: string }
-}
-
-export interface HadithBook {
-  id: string
-  title: { ru: string; en: string }
-  narrator: { ru: string; en: string }
-  hadiths: HadithItem[]
+  text: string
+  reference?: { book: number; hadith: number }
 }

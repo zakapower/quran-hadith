@@ -5,6 +5,8 @@ import type { SurahContent } from '../data/types'
 import { surahTitleRu } from '../data/surahNamesRu'
 import { parseAyahParam } from '../utils/ayahRef'
 import { CopyAyahButton } from '../components/CopyAyahButton'
+import { ReaderSkeleton } from '../components/ReaderSkeleton'
+import { useReaderScrollMemory } from '../hooks/useReaderScrollMemory'
 import { useApp } from '../context/AppContext'
 import './Reader.css'
 
@@ -16,6 +18,8 @@ export function SurahPage() {
   const [error, setError] = useState<string | null>(null)
 
   const n = Number(number)
+  const readerPath =
+    Number.isFinite(n) && n >= 1 && n <= 114 ? `/quran/${n}` : null
   const title = surah
     ? lang === 'ru'
       ? surahTitleRu(surah.number, surah.englishName)
@@ -62,12 +66,14 @@ export function SurahPage() {
     return () => window.clearTimeout(id)
   }, [surah, highlight])
 
+  useReaderScrollMemory(readerPath, Boolean(surah), Boolean(highlight))
+
   return (
     <div className="reader">
       <nav className="reader__crumb">
         <Link to="/quran">{t('Коран', 'Qur’an')}</Link>
         <span aria-hidden="true">/</span>
-        <span>{title ?? `…`}</span>
+        <span>{title ?? '…'}</span>
       </nav>
 
       {error && (
@@ -78,7 +84,10 @@ export function SurahPage() {
         </p>
       )}
       {!surah && !error && (
-        <p className="reader__status">{t('Загрузка…', 'Loading…')}</p>
+        <ReaderSkeleton
+          variant="surah"
+          label={t('Загрузка…', 'Loading…')}
+        />
       )}
 
       {surah && title && (

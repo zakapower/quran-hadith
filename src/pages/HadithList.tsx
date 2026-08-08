@@ -1,10 +1,14 @@
 import { Link } from 'react-router-dom'
-import { hadithBooks } from '../data/hadiths'
+import { hadithCollections } from '../data/hadithCatalog'
+import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
+import { saveLastHadith, saveListScroll } from '../utils/scrollMemory'
 import { useApp } from '../context/AppContext'
 import './List.css'
 
 export function HadithList() {
   const { lang, t } = useApp()
+
+  useRestoreListScroll('/hadith', true)
 
   return (
     <div className="list-page">
@@ -12,24 +16,30 @@ export function HadithList() {
         <h1>{t('Хадисы', 'Hadith')}</h1>
         <p>
           {t(
-            'Короткие сборники для начала. Позже можно добавить больше.',
-            'Short collections to start. More can be added later.',
+            'Сахих аль-Бухари и Сахих Муслим.',
+            'Sahih al-Bukhari and Sahih Muslim.',
           )}
         </p>
       </header>
 
       <ol className="card-list">
-        {hadithBooks.map((b, i) => (
-          <li key={b.id}>
-            <Link to={`/hadith/${b.id}`}>
+        {hadithCollections.map((b, i) => (
+          <li key={b.id} id={`hadith-book-${b.id}`}>
+            <Link
+              to={`/hadith/${b.id}`}
+              onClick={() => {
+                saveListScroll('/hadith')
+                saveLastHadith(b.id)
+              }}
+            >
               <span className="card-list__n">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <span className="card-list__body">
                 <strong>{b.title[lang]}</strong>
                 <span className="card-list__meta">
-                  {b.narrator[lang]} · {b.hadiths.length}{' '}
-                  {t('хадисов', 'hadiths')}
+                  {b.narrator[lang]}
+                  {` · ${b.hadithCount} ${t('хадисов', 'hadiths')}`}
                 </span>
               </span>
             </Link>

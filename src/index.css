@@ -3,6 +3,8 @@
   --font-display: 'Literata', Georgia, serif;
   --font-arabic: 'UthmanicHafs', 'KFGQPC Uthmanic Script HAFS', serif;
   --max: 45rem;
+  --reader-ar-scale: 1;
+  --reader-tr-scale: 1;
 
   --bg: #f3f5f2;
   --wash: #dce8e1;
@@ -50,6 +52,15 @@ html {
   overflow-x: hidden;
   /* Нативная полоса скрыта — кастомная overlay не занимает место */
   scrollbar-width: none;
+  background-color: var(--bg);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+html:not([data-theme='dark']) {
+  color-scheme: light;
 }
 
 html::-webkit-scrollbar {

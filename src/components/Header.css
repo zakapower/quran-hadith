@@ -2,8 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(12px);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -64,12 +63,12 @@
 }
 
 .ctrl {
-  min-width: 2.35rem;
+  width: 2.35rem;
   height: 2.35rem;
   border: 1px solid var(--line);
   background: var(--surface);
-  color: var(--ink);
-  border-radius: 0.45rem;
+  color: var(--muted);
+  border-radius: 0.4rem;
   cursor: pointer;
   font: inherit;
   font-size: 0.78rem;
@@ -77,21 +76,107 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0.55rem;
-}
-
-.ctrl--icon {
   padding: 0;
+  flex-shrink: 0;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
-.ctrl__icon {
+.ctrl__stack {
+  position: relative;
   width: 1.15rem;
   height: 1.15rem;
   display: block;
 }
 
+.ctrl__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.ctrl__face--moon,
+.ctrl__face--sun {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+/* lang: RU → show EN (switch to English) */
+.ctrl__face--en {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ctrl__face--ru {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.ctrl--lang-en .ctrl__face--en {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.ctrl--lang-en .ctrl__face--ru {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* theme: light → moon */
+.ctrl__face--moon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ctrl__face--sun {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.ctrl--theme-dark .ctrl__face--moon {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.ctrl--theme-dark .ctrl__face--sun {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .ctrl:hover {
-  border-color: var(--accent);
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  transform: scale(1.04);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.ctrl:active {
+  transform: scale(0.94);
+  box-shadow: none;
+  transition-duration: 0.1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctrl,
+  .ctrl__face {
+    transition: none;
+  }
+
+  .ctrl:hover,
+  .ctrl:active {
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 @media (max-width: 720px) {

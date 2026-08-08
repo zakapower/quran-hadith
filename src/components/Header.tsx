@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import { BookOpen, Moon, Sun } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { SettingsPopover } from './SettingsPopover'
 import './Header.css'
 
 export function Header() {
@@ -25,15 +26,18 @@ export function Header() {
         <div className="site-controls">
           <button
             type="button"
-            className="ctrl"
+            className={`ctrl${lang === 'en' ? ' ctrl--lang-en' : ''}`}
             onClick={toggleLang}
             aria-label={t('Switch to English', 'Переключить на русский')}
           >
-            {lang === 'ru' ? 'EN' : 'RU'}
+            <span className="ctrl__stack" aria-hidden="true">
+              <span className="ctrl__face ctrl__face--en">EN</span>
+              <span className="ctrl__face ctrl__face--ru">RU</span>
+            </span>
           </button>
           <button
             type="button"
-            className="ctrl ctrl--icon"
+            className={`ctrl${theme === 'dark' ? ' ctrl--theme-dark' : ''}`}
             onClick={toggleTheme}
             aria-label={
               theme === 'light'
@@ -41,12 +45,12 @@ export function Header() {
                 : t('Светлая тема', 'Light theme')
             }
           >
-            {theme === 'light' ? (
-              <Moon className="ctrl__icon" aria-hidden="true" strokeWidth={2} />
-            ) : (
-              <Sun className="ctrl__icon" aria-hidden="true" strokeWidth={2} />
-            )}
+            <span className="ctrl__stack" aria-hidden="true">
+              <Moon className="ctrl__face ctrl__face--moon" strokeWidth={2} />
+              <Sun className="ctrl__face ctrl__face--sun" strokeWidth={2} />
+            </span>
           </button>
+          <SettingsPopover />
         </div>
       </div>
     </header>

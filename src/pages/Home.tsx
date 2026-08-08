@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { fetchSurahList } from '../api/quran'
 import type { SurahMeta } from '../data/types'
 import { surahMeaningRu, surahTitleRu } from '../data/surahNamesRu'
+import { useRestoreListScroll } from '../hooks/useRestoreListScroll'
+import { saveLastSurah, saveListScroll } from '../utils/scrollMemory'
 import { useApp } from '../context/AppContext'
 import './List.css'
 import './Home.css'
@@ -25,6 +27,8 @@ export function Home() {
       cancelled = true
     }
   }, [])
+
+  useRestoreListScroll('/', Boolean(list))
 
   return (
     <div className="home">
@@ -75,8 +79,14 @@ export function Home() {
         {list && (
           <ol className="card-list card-list--cols">
             {list.map((s) => (
-              <li key={s.number}>
-                <Link to={`/quran/${s.number}`}>
+              <li key={s.number} id={`surah-${s.number}`}>
+                <Link
+                  to={`/quran/${s.number}`}
+                  onClick={() => {
+                    saveListScroll('/')
+                    saveLastSurah(s.number)
+                  }}
+                >
                   <span className="card-list__n">
                     {String(s.number).padStart(2, '0')}
                   </span>
