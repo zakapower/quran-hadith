@@ -44,7 +44,7 @@ function readStoredTheme(): Theme {
   } catch {
     /* ignore */
   }
-  return 'light'
+  return 'dark'
 }
 
 function readStoredScale(key: string): number {
@@ -100,7 +100,7 @@ export function AppProvider({
 }) {
   const router = useRouter()
   const [lang, setLangState] = useState<Lang>(initialLang)
-  const [theme, setTheme] = useState<Theme>('light')
+  const [theme, setTheme] = useState<Theme>('dark')
   const [themeReady, setThemeReady] = useState(false)
   const [fontAr, setFontArState] = useState(FONT_SCALE_DEFAULT)
   const [fontTr, setFontTrState] = useState(FONT_SCALE_DEFAULT)
