@@ -82,16 +82,57 @@
   font-weight: 600;
   font-size: 0.95rem;
   border: 1px solid transparent;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    filter 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.hero__actions .btn {
+  animation: btn-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero__actions .btn:nth-child(2) {
+  animation-delay: 0.08s;
 }
 
 .btn--ghost {
   background: var(--surface);
   color: var(--ink);
   border-color: var(--line);
+  box-shadow: none;
 }
 
 .btn:hover {
-  filter: brightness(1.05);
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.btn--ghost:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  filter: none;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+  filter: brightness(0.98);
+  transition-duration: 0.1s;
+}
+
+@keyframes btn-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .home-surahs {
@@ -146,5 +187,23 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home,
+  .hero__actions .btn {
+    animation: none;
+  }
+
+  .btn {
+    transition: none;
+  }
+
+  .btn:hover,
+  .btn:active {
+    transform: none;
+    box-shadow: none;
+    filter: none;
   }
 }

@@ -19,17 +19,12 @@
     color 0.22s ease;
 }
 
-.settings .ctrl:hover .ctrl__gear {
-  transform: rotate(30deg);
-}
-
 .settings .ctrl--open {
   color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 }
 
-.settings .ctrl--open .ctrl__gear,
-.settings .ctrl--open:hover .ctrl__gear {
+.settings .ctrl--open .ctrl__gear {
   transform: rotate(90deg);
   color: var(--accent);
 }
@@ -137,9 +132,7 @@
     transition: none;
   }
 
-  .settings .ctrl:hover .ctrl__gear,
-  .settings .ctrl--open .ctrl__gear,
-  .settings .ctrl--open:hover .ctrl__gear {
+  .settings .ctrl--open .ctrl__gear {
     transform: none;
   }
 }

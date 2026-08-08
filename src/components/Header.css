@@ -81,7 +81,6 @@
   transition:
     color 0.22s ease,
     border-color 0.22s ease,
-    transform 0.22s ease,
     box-shadow 0.22s ease;
 }
 
@@ -90,6 +89,7 @@
   width: 1.15rem;
   height: 1.15rem;
   display: block;
+  overflow: hidden;
 }
 
 .ctrl__face {
@@ -100,9 +100,7 @@
   justify-content: center;
   line-height: 1;
   letter-spacing: 0.02em;
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease;
+  transition: opacity 0.22s ease;
 }
 
 .ctrl__face--moon,
@@ -114,55 +112,46 @@
 /* lang: RU → show EN (switch to English) */
 .ctrl__face--en {
   opacity: 1;
-  transform: scale(1);
 }
 
 .ctrl__face--ru {
   opacity: 0;
-  transform: scale(0.7);
 }
 
 .ctrl--lang-en .ctrl__face--en {
   opacity: 0;
-  transform: scale(0.7);
 }
 
 .ctrl--lang-en .ctrl__face--ru {
   opacity: 1;
-  transform: scale(1);
 }
 
 /* theme: light → moon */
 .ctrl__face--moon {
   opacity: 1;
-  transform: scale(1);
 }
 
 .ctrl__face--sun {
   opacity: 0;
-  transform: scale(0.7);
 }
 
 .ctrl--theme-dark .ctrl__face--moon {
   opacity: 0;
-  transform: scale(0.7);
 }
 
 .ctrl--theme-dark .ctrl__face--sun {
   opacity: 1;
-  transform: scale(1);
 }
 
 .ctrl:hover {
   color: var(--ink);
   border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-  transform: scale(1.04);
   box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .ctrl:active {
-  transform: scale(0.94);
   box-shadow: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
   transition-duration: 0.1s;
 }
 
@@ -172,9 +161,7 @@
     transition: none;
   }
 
-  .ctrl:hover,
-  .ctrl:active {
-    transform: none;
+  .ctrl:hover {
     box-shadow: none;
   }
 }
