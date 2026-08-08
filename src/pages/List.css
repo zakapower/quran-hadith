@@ -1,0 +1,131 @@
+.list-page {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 2.25rem 1.25rem 4rem;
+  animation: in 0.45s ease both;
+}
+
+.list-page__head h1 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.2rem);
+  letter-spacing: -0.03em;
+}
+
+.list-page__head p {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.search input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.search input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card-list__ayah-hit {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line)) !important;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface)) !important;
+}
+
+.list-page__status {
+  color: var(--muted);
+  margin-top: 1.5rem;
+}
+
+.card-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.card-list li a {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--ink);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.card-list li a:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
+
+.card-list__n {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding-top: 0.2rem;
+}
+
+.card-list__body {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.card-list__body strong {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: baseline;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.card-list__ar {
+  font-family: var(--font-arabic);
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.card-list__meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
