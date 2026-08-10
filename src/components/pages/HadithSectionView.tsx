@@ -1,19 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { fetchHadithSection, fetchHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithItem } from '@/data/types'
 import { CopyQuoteButton } from '@/components/CopyQuoteButton'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
 import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
+import { parseHadithParam } from '@/utils/hadithRef'
 import { useApp } from '@/context/AppContext'
 import './Reader.css'
 
 export function HadithSectionView() {
   const params = useParams<{ id: string; sectionId: string }>()
+  const searchParams = useSearchParams()
   const { lang, t } = useApp()
   const book = params.id ? getHadithCollection(params.id) : undefined
   const sectionId = params.sectionId
@@ -23,7 +25,11 @@ export function HadithSectionView() {
   const readerPath =
     book && sectionId ? `/hadith/${book.id}/${sectionId}` : null
 
-  useReaderScrollMemory(readerPath, Boolean(hadiths))
+  const highlight = useMemo(() => {
+    const n = parseHadithParam(searchParams.get('h'))
+    if (!n || !hadiths) return null
+    return hadiths.some((h) => h.number === n) ? n : null
+  }, [searchParams, hadiths])
 
   useEffect(() => {
     if (!book || !sectionId) {
@@ -53,6 +59,18 @@ export function HadithSectionView() {
     }
   }, [book, sectionId, lang])
 
+  useEffect(() => {
+    if (!hadiths || !highlight || !book) return
+    const el = document.getElementById(`${book.id}-${highlight}`)
+    if (!el) return
+    const id = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 80)
+    return () => window.clearTimeout(id)
+  }, [hadiths, highlight, book])
+
+  useReaderScrollMemory(readerPath, Boolean(hadiths), Boolean(highlight))
+
   if (!book || error === 'missing') {
     return (
       <div className="reader">
@@ -75,7 +93,11 @@ export function HadithSectionView() {
       {hadiths && (
         <header className="reader__head">
           <h1>{title}</h1>
-          <p className="reader__sub">{book.title[lang]}</p>
+          <p className="reader__sub">
+            {highlight
+              ? t(`Хадис ${highlight}`, `Hadith ${highlight}`)
+              : book.title[lang]}
+          </p>
         </header>
       )}
 
@@ -93,24 +115,31 @@ export function HadithSectionView() {
 
       {hadiths && (
         <div className="ayah-list">
-          {hadiths.map((h) => (
-            <article key={h.id} className="ayah" id={h.id}>
-              <div className="ayah__top">
-                <p className="ayah__n">{h.number}</p>
-                <CopyQuoteButton
-                  heading={`${book.title[lang]} ${h.number}`}
-                  body={h.text || h.arabic || ''}
-                  label={t('Копировать хадис', 'Copy hadith')}
-                />
-              </div>
-              {h.arabic && (
-                <p className="ayah__ar" dir="rtl" lang="ar">
-                  {h.arabic}
-                </p>
-              )}
-              {h.text && <p className="ayah__tr">{h.text}</p>}
-            </article>
-          ))}
+          {hadiths.map((h) => {
+            const hit = highlight === h.number
+            return (
+              <article
+                key={h.id}
+                className={hit ? 'ayah ayah--hit' : 'ayah'}
+                id={h.id}
+              >
+                <div className="ayah__top">
+                  <p className="ayah__n">{h.number}</p>
+                  <CopyQuoteButton
+                    heading={`${book.title[lang]} ${h.number}`}
+                    body={h.text || h.arabic || ''}
+                    label={t('Копировать хадис', 'Copy hadith')}
+                  />
+                </div>
+                {h.arabic && (
+                  <p className="ayah__ar" dir="rtl" lang="ar">
+                    {h.arabic}
+                  </p>
+                )}
+                {h.text && <p className="ayah__tr">{h.text}</p>}
+              </article>
+            )
+          })}
         </div>
       )}
     </div>

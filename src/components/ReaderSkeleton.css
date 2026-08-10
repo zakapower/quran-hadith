@@ -2,6 +2,11 @@
   margin-top: 0.25rem;
 }
 
+.reader-skel--chapters {
+  /* Как у .card-list после поиска на странице сборника */
+  margin-top: 1rem;
+}
+
 .reader-skel__head {
   margin-bottom: 1.75rem;
   text-align: center;
@@ -17,7 +22,7 @@
 
 .reader-skel--chapters .reader-skel__list {
   gap: 0.55rem;
-  margin-top: 0.25rem;
+  margin-top: 0;
 }
 
 .reader-skel__bone {

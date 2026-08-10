@@ -34,6 +34,44 @@
   outline-offset: 2px;
 }
 
+.search-skel__bone {
+  width: 100%;
+  height: 3.05rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--wash) 88%, var(--line)) 0%,
+    color-mix(in srgb, var(--surface) 70%, var(--wash)) 42%,
+    color-mix(in srgb, var(--wash) 88%, var(--line)) 78%
+  );
+  background-size: 220% 100%;
+  animation: list-skel-shimmer 1.55s ease-in-out infinite;
+}
+
+@keyframes list-skel-shimmer {
+  0% {
+    background-position: 100% 0;
+    opacity: 0.72;
+  }
+  50% {
+    background-position: 0% 0;
+    opacity: 1;
+  }
+  100% {
+    background-position: 100% 0;
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-skel__bone {
+    animation: none;
+    background: color-mix(in srgb, var(--wash) 75%, var(--line));
+    opacity: 0.85;
+  }
+}
+
 .card-list__ayah-hit {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--line)) !important;
   background: color-mix(in srgb, var(--accent) 8%, var(--surface)) !important;

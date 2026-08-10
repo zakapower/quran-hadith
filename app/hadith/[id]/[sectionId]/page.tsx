@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { HadithSectionView } from '@/components/pages/HadithSectionView'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import { getRequestLang } from '@/lib/request-lang'
@@ -31,5 +32,9 @@ export async function generateMetadata({
 }
 
 export default function HadithSectionPage() {
-  return <HadithSectionView />
+  return (
+    <Suspense fallback={null}>
+      <HadithSectionView />
+    </Suspense>
+  )
 }
