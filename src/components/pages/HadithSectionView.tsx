@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { fetchHadithSection, fetchHadithSections } from '@/api/hadith'
+import { fetchHadithSection, fetchHadithSections, peekHadithSection, peekHadithSections, prefetchNearbyHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithItem, HadithSectionMeta } from '@/data/types'
 import { CopyQuoteButton } from '@/components/CopyQuoteButton'
@@ -108,6 +108,23 @@ export function HadithSectionView() {
     }
     let cancelled = false
     setError(null)
+
+    const cachedSecs = peekHadithSections(book.id, lang)
+    const cachedItems = peekHadithSection(book.id, sectionId, lang)
+    if (cachedSecs && cachedItems) {
+      const sec = cachedSecs.find((s) => s.id === sectionId)
+      setSections(cachedSecs)
+      setTitle(sec?.name ?? sectionId)
+      setHadiths(cachedItems)
+      prefetchNearbyHadithSections(
+        book.id,
+        sectionId,
+        lang,
+        cachedSecs.map((s) => s.id),
+      )
+      return
+    }
+
     setHadiths(null)
     setSections(null)
 
@@ -121,6 +138,12 @@ export function HadithSectionView() {
         setSections(secs)
         setTitle(sec?.name ?? sectionId)
         setHadiths(items)
+        prefetchNearbyHadithSections(
+          book.id,
+          sectionId,
+          lang,
+          secs.map((s) => s.id),
+        )
       })
       .catch(() => {
         if (!cancelled) setError('load-failed')

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { fetchHadithSections } from '@/api/hadith'
+import { fetchHadithSections, peekHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithSectionMeta } from '@/data/types'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
@@ -37,6 +37,13 @@ export function HadithBookView() {
     }
     let cancelled = false
     setError(null)
+
+    const cached = peekHadithSections(book.id, lang)
+    if (cached) {
+      setSections(cached)
+      return
+    }
+
     setSections(null)
 
     fetchHadithSections(book.id, lang)

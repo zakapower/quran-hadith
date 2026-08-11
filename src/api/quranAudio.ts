@@ -6,6 +6,7 @@ import {
   type AyahTiming,
   type WordSegment,
 } from '@/utils/audioSegments'
+import { cacheGet, cacheSet } from '@/utils/pageCache'
 
 const API = 'https://api.quran.com/api/v4'
 
@@ -74,6 +75,7 @@ async function fetchRelativeTimings(
   try {
     const res = await fetch(
       `${API}/chapter_recitations/${reciterId}/${chapter}?segments=true`,
+      { cache: 'force-cache' },
     )
     if (!res.ok) return null
     const data = (await res.json()) as RawChapterRecitation
@@ -97,6 +99,25 @@ async function fetchRelativeTimings(
   }
 }
 
+type StoredPack = {
+  timestamps: AyahTiming[]
+  audioByAyah: Record<string, string>
+}
+
+function packFromStore(raw: StoredPack): ChapterAudioPack {
+  const audioByAyah = new Map<number, string>()
+  for (const [k, v] of Object.entries(raw.audioByAyah)) {
+    audioByAyah.set(Number(k), v)
+  }
+  return { timestamps: raw.timestamps, audioByAyah }
+}
+
+function packToStore(pack: ChapterAudioPack): StoredPack {
+  const audioByAyah: Record<string, string> = {}
+  for (const [k, v] of pack.audioByAyah) audioByAyah[String(k)] = v
+  return { timestamps: pack.timestamps, audioByAyah }
+}
+
 export async function fetchChapterAudioPack(
   reciterId: number,
   chapter: number,
@@ -104,6 +125,13 @@ export async function fetchChapterAudioPack(
   const key = packKey(reciterId, chapter)
   const hit = packCache.get(key)
   if (hit) return hit
+
+  const stored = cacheGet<StoredPack>('audio-pack', key)
+  if (stored?.timestamps?.length) {
+    const pack = packFromStore(stored)
+    packCache.set(key, pack)
+    return pack
+  }
 
   const meta = getSurahMeta(chapter)
   if (!meta) throw new Error('surah not found')
@@ -115,6 +143,7 @@ export async function fetchChapterAudioPack(
 
   const out = { timestamps, audioByAyah }
   packCache.set(key, out)
+  cacheSet('audio-pack', key, packToStore(out))
   return out
 }
 
@@ -136,11 +165,20 @@ export async function fetchChapterWords(
   const cached = wordsCache.get(chapter)
   if (cached) return cached
 
+  const stored = cacheGet<Record<string, string[]>>('audio-words', String(chapter))
+  if (stored) {
+    const map = new Map<number, string[]>()
+    for (const [k, v] of Object.entries(stored)) map.set(Number(k), v)
+    wordsCache.set(chapter, map)
+    return map
+  }
+
   const map = new Map<number, string[]>()
   let page = 1
   for (;;) {
     const res = await fetch(
       `${API}/verses/by_chapter/${chapter}?words=true&word_fields=text_uthmani&per_page=50&page=${page}`,
+      { cache: 'force-cache' },
     )
     if (!res.ok) throw new Error(`words ${chapter} p${page} failed`)
     const data = (await res.json()) as WordsPage
@@ -156,5 +194,8 @@ export async function fetchChapterWords(
   }
 
   wordsCache.set(chapter, map)
+  const serial: Record<string, string[]> = {}
+  for (const [k, v] of map) serial[String(k)] = v
+  cacheSet('audio-words', String(chapter), serial)
   return map
 }

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
-import { fetchSurah } from '@/api/quran'
+import { fetchSurah, peekSurah, prefetchNearbySurahs } from '@/api/quran'
 import type { SurahContent } from '@/data/types'
 import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import { parseAyahParam } from '@/utils/ayahRef'
@@ -147,11 +147,22 @@ export function SurahView() {
       return
     }
     let cancelled = false
-    setSurah(null)
     setError(null)
+
+    const cached = peekSurah(n, lang)
+    if (cached) {
+      setSurah(cached)
+      prefetchNearbySurahs(n, lang)
+      return
+    }
+
+    setSurah(null)
     fetchSurah(n, lang)
       .then((data) => {
-        if (!cancelled) setSurah(data)
+        if (!cancelled) {
+          setSurah(data)
+          prefetchNearbySurahs(n, lang)
+        }
       })
       .catch(() => {
         if (!cancelled) setError('load-failed')
