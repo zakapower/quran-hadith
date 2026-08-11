@@ -58,6 +58,7 @@ export async function fetchSurah(
     number: meta.number,
     name: meta.name,
     englishName: meta.englishName,
+    englishNameTranslation: meta.englishNameTranslation,
     ayahsArabic: toAyahs(arabic.chapter),
     ayahsTranslation: toAyahs(translation.chapter),
   }

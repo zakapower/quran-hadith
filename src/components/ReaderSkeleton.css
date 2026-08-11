@@ -107,6 +107,12 @@
   height: 0.9rem;
   border-radius: 0.35rem;
   opacity: 0.88;
+  flex-shrink: 1;
+}
+
+.reader-skel--hadith .reader-skel__nav-meta {
+  width: min(11rem, 48%);
+  height: 0.95rem;
 }
 
 .reader-skel--surah .reader-skel__nav > .reader-skel__nav-meta {
@@ -139,6 +145,19 @@
 .reader-skel__badge {
   width: 1.15rem;
   height: 0.8rem;
+}
+
+.reader-skel__badge--hadith {
+  width: 2.1rem;
+  height: 0.9rem;
+}
+
+.reader-skel__card--hadith .reader-skel__line--tr {
+  margin-top: 0.35rem;
+}
+
+.reader-skel__card--hadith .reader-skel__card-top + .reader-skel__line--tr {
+  margin-top: 0;
 }
 
 /* Как у .ayah__copy */

@@ -6,7 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import { fetchSurah } from '@/api/quran'
 import type { SurahContent } from '@/data/types'
-import { surahTitleRu } from '@/data/surahNamesRu'
+import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import { parseAyahParam } from '@/utils/ayahRef'
 import { CopyAyahButton } from '@/components/CopyAyahButton'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
@@ -125,6 +125,11 @@ export function SurahView() {
       ? surahTitleRu(surah.number, surah.englishName)
       : surah.englishName
     : null
+  const meaning = surah
+    ? lang === 'ru'
+      ? surahMeaningRu(surah.number, surah.englishNameTranslation)
+      : surah.englishNameTranslation
+    : null
 
   const highlight = useMemo(() => {
     const range = parseAyahParam(searchParams.get('a'))
@@ -196,8 +201,9 @@ export function SurahView() {
               {surah.name}
             </p>
             <h1>{title}</h1>
+            {meaning && <p className="reader__sub">{meaning}</p>}
             {highlight && (
-              <p className="reader__sub">
+              <p className="reader__sub reader__sub--ayah">
                 {highlight.from === highlight.to
                   ? t(`Аят ${highlight.from}`, `Ayah ${highlight.from}`)
                   : t(
