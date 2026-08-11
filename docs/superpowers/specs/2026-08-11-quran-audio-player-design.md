@@ -1,184 +1,185 @@
-# Quran Audio Player + Word Karaoke — Design
+# Аудиоплеер Корана + караоке по словам — дизайн
 
-Date: 2026-08-11  
-Status: draft for user review
+Дата: 2026-08-11  
+Статус: черновик на ревью
 
-## Goal
+## Цель
 
-Add a Qur’an audio player on surah pages with:
+Добавить аудиоплеер на страницах сур:
 
-- Play control between surah prev/next arrows
-- Per-ayah play to start from a chosen ayah
-- Sticky bottom player bar
-- Two reciters (Abu Bakr ash-Shatri, Mishary Al-Afasy)
-- Auto-advance ayah with highlight + autoscroll
-- Word-by-word karaoke highlighting while an ayah is recited
+- кнопка Play между стрелками prev/next суры;
+- Play на аяте — старт с выбранного аята;
+- липкая нижняя панель плеера;
+- два чтеца (Абу Бакр аш-Шатри, Мишари Аль-Афаси);
+- автопереход к следующему аяту с подсветкой и автоскроллом;
+- караоке-подсветка **по словам** во время чтения.
 
-## Non-goals (v1)
+## Вне scope (v1)
 
-- Hadith audio
-- More than two reciters
-- Playback speed control
-- Download / offline cache of MP3
-- Continuing into the next surah automatically
-- Letter-level karaoke
+- больше двух чтецов;
+- скорость воспроизведения;
+- скачивание / офлайн-кэш MP3;
+- автопереход на следующую суру;
+- караоке по буквам.
 
-## Decisions (locked)
+Плеер только для Корана (страницы сур). Хадисы не затрагиваем.
 
-| Topic | Choice |
-|--------|--------|
-| Player chrome | Sticky bottom bar (opens on Play) |
-| Playback flow | Auto next ayah + ayah highlight + autoscroll |
-| End of surah | Pause; bar stays open on last ayah |
-| Start ayah (nav Play) | Resume last ayah for that surah from `localStorage`, else ayah 1 |
-| Per-ayah Play | Yes — starts from that ayah |
-| Close (✕) | Hide bar + pause |
-| Leave surah page | Pause + hide bar |
-| Icons | Lucide only (`Play`, `Pause`, `SkipBack`, `SkipForward`, `X`, etc.) |
-| Audio + timings | Quran.com public API chapter recitation (not everyayah) |
-| Karaoke | Word-level segments synced to chapter MP3 |
+## Зафиксированные решения
 
-## Architecture
+| Тема | Выбор |
+|------|--------|
+| Внешний вид плеера | Sticky-бар снизу (появляется по Play) |
+| Воспроизведение | Авто следующий аят + подсветка + автоскролл |
+| Конец суры | Пауза; бар остаётся на последнем аяте |
+| Старт (Play в навбаре) | Продолжить с последнего аята суры из `localStorage`, иначе аят 1 |
+| Play на аяте | Да — старт с этого аята |
+| Закрытие (✕) | Скрыть бар + пауза |
+| Уход со страницы суры | Пауза + скрыть бар |
+| Иконки | Только Lucide (`Play`, `Pause`, `SkipBack`, `SkipForward`, `X` и т.д.) |
+| Аудио + тайминги | Публичный API Quran.com, chapter recitation (не everyayah) |
+| Караоке | Word-сегменты, синхронные с MP3 всей суры |
 
-### Audio source
+## Архитектура
 
-Use chapter-level MP3 + verse/word timestamps:
+### Источник аудио
+
+MP3 всей суры + таймстемпы аятов/слов:
 
 `GET https://api.quran.com/api/v4/chapter_recitations/{reciterId}/{chapter}?segments=true`
 
-Verified reciter IDs:
+Проверенные ID чтецов:
 
-| Reciter (UI) | API id | Sample audio |
-|--------------|--------|--------------|
-| Abu Bakr ash-Shatri | `4` | `…/abu_bakr_shatri/murattal/{n}.mp3` |
-| Mishary Al-Afasy | `7` | `…/mishari_al_afasy/murattal/{n}.mp3` |
+| Чтец (UI) | API id | Пример аудио |
+|-----------|--------|--------------|
+| Абу Бакр аш-Шатри | `4` | `…/abu_bakr_shatri/murattal/{n}.mp3` |
+| Мишари Аль-Афаси | `7` | `…/mishari_al_afasy/murattal/{n}.mp3` |
 
-Response shape (relevant fields):
+Важные поля ответа:
 
-- `audio_file.audio_url` — full surah MP3
-- `audio_file.timestamps[]` — per ayah:
-  - `verse_key`, `timestamp_from`, `timestamp_to` (ms)
-  - `segments`: arrays `[wordIndex, startMs, endMs]` (filter malformed entries that lack times)
+- `audio_file.audio_url` — MP3 всей суры;
+- `audio_file.timestamps[]` — по аятам:
+  - `verse_key`, `timestamp_from`, `timestamp_to` (мс);
+  - `segments`: массивы `[wordIndex, startMs, endMs]` (отбрасывать битые записи без времён).
 
-CDN base for relative ayah URLs is not needed for chapter mode; use `audio_url` as-is.
+В chapter-режиме относительные URL аятов не нужны — берём `audio_url` как есть.
 
-### Word text for karaoke
+### Текст слов для караоке
 
-Arabic ayah text on the reader must be renderable as **word spans** whose indices match segment `wordIndex` (1-based in API samples).
+Арабский текст аята в ридере должен рендериться **спанами по словам**, индексы которых совпадают с `wordIndex` в сегментах (в API — 1-based).
 
-Fetch words when playback needs karaoke (lazy on first play of a surah is fine), e.g.:
+Слова подгружать, когда нужно караоке (лениво при первом play суры нормально), например:
 
 `GET https://api.quran.com/api/v4/verses/by_chapter/{n}?words=true&word_fields=text_uthmani&per_page=50`
 
-Paginate until all ayahs are loaded (al-Baqarah = 286 verses). Cache the word map `ayahNumber → text_uthmani[]`.
+Пагинировать, пока не загрузятся все аяты (аль-Бакара = 286). Кэшировать карту `номерАята → text_uthmani[]`.
 
-Use `char_type_name === "word"` only (skip ayah end markers). Keep existing translation source (`fawazahmed0` / current `fetchSurah`) for RU/EN lines unless we later unify.
+Брать только `char_type_name === "word"` (пропускать маркеры конца аята). Переводы RU/EN оставить из текущего `fetchSurah` / fawazahmed0, пока не унифицируем.
 
-Fallback if words or segments missing for an ayah: highlight the whole ayah only (no word karaoke).
+Если слов или сегментов нет для аята — подсвечивать весь аят (без караоке по словам).
 
-### Modules
+### Модули
 
 1. **`src/data/reciters.ts`**  
-   Static list of two reciters (`id`, `nameRu`, `nameEn`, default).
+   Статический список из двух чтецов (`id`, `nameRu`, `nameEn`, default).
 
 2. **`src/api/quranAudio.ts`**  
-   `fetchChapterRecitation(reciterId, chapter)` → audio URL + timestamps (in-memory cache per reciter+chapter).  
-   Optional: `fetchChapterWords(chapter)` for uthmani word tokens (cache).
+   `fetchChapterRecitation(reciterId, chapter)` → URL + таймстемпы (кэш в памяти на пару чтец+сура).  
+   Опционально: `fetchChapterWords(chapter)` для uthmani-токенов (кэш).
 
-3. **`QuranAudioProvider` / context**  
-   Single hidden `<audio>` element. State:
-   - `visible`, `playing`
-   - `reciterId`, `surah`, `ayah`
-   - `activeWordIndex` (`null` when not karaoke-able)
-   - `progress` (0–1 within current ayah or full file — prefer within-ayah for the bar)
-   - `error` (load/play failure message)
-   - `lastAyahBySurah` hydrated from `localStorage`
+3. **`QuranAudioProvider` / контекст**  
+   Один скрытый `<audio>`. Состояние:
+   - `visible`, `playing`;
+   - `reciterId`, `surah`, `ayah`;
+   - `activeWordIndex` (`null`, если караоке недоступно);
+   - `progress` (0–1 **внутри текущего аята** для полоски бара);
+   - `error` (ошибка загрузки/play);
+   - `lastAyahBySurah` из `localStorage`.
 
-   Actions: `openAndPlay({ surah, ayah? })`, `pause`, `resume`, `close`, `nextAyah`, `prevAyah`, `setReciter`, seek within ayah optional (progress bar click — nice-to-have if cheap).
+   Действия: `openAndPlay({ surah, ayah? })`, `pause`, `resume`, `close`, `nextAyah`, `prevAyah`, `setReciter`; seek по клику на прогресс — nice-to-have, если дёшево.
 
 4. **`QuranPlayerBar`**  
-   Sticky bottom UI; mounted near app shell / layout so it can sit above content while on `/quran/[n]`.
+   Sticky UI снизу; вешать у shell/layout, чтобы перекрывал контент на `/quran/[n]`.
 
 5. **`SurahView` / `SurahNav`**  
-   Center Play between chevrons; per-ayah Play next to copy; ayah Arabic rendered with word spans; `ayah--playing` + `ayah__word--active`.
+   Play по центру между шевронами; Play на аяте рядом с копированием; арабский текст словами; классы `ayah--playing` + `ayah__word--active`.
 
-6. **Persistence**  
-   `localStorage` keys (namespaced, e.g. `tilawah-audio-v1`):
-   - selected `reciterId`
-   - map `surah → lastAyah`
+6. **Персистентность**  
+   Ключи `localStorage` (неймспейс, напр. `tilawah-audio-v1`):
+   - выбранный `reciterId`;
+   - карта `сура → последнийАят`.
 
-### Playback engine (behavior)
+### Движок воспроизведения
 
-1. On first play for `(reciter, surah)`: fetch chapter audio payload; set `audio.src = audio_url`; when ready, `currentTime = timestamp_from(ayah) / 1000`; `play()`.
-2. On `timeupdate`:
-   - Derive current ayah from timestamps (or trust queued ayah until `timestamp_to`).
-   - Set `activeWordIndex` from segments where `startMs <= t < endMs`.
-   - Update progress for the bar.
-3. When `t` crosses ayah `timestamp_to` (or `ended` near last):
-   - If more ayahs: bump ayah, highlight, smooth-scroll into view, continue (same file — no reload).
-   - If last ayah: `pause()`, keep bar visible, persist last ayah.
-4. Prev/next controls: seek to neighboring ayah’s `timestamp_from` (clamp at 1 / last).
-5. Reciter change: keep surah+ayah; refetch chapter audio for new reciter; restart that ayah from its `timestamp_from`.
-6. Close ✕: `pause()`, `visible = false`, clear `activeWordIndex`.
-7. Route change away from current surah reader: same as close (pause + hide).
-8. Errors: show short message in bar + retry; do not auto-advance.
+1. Первый play для `(reciter, surah)`: скачать chapter-пейлоад; `audio.src = audio_url`; по готовности `currentTime = timestamp_from(ayah) / 1000`; `play()`.
+2. На `timeupdate`:
+   - определить текущий аят по таймстемпам (или держать выбранный до `timestamp_to`);
+   - выставить `activeWordIndex` по сегментам, где `startMs <= t < endMs`;
+   - обновить progress бара.
+3. Когда `t` пересекает `timestamp_to` аята (или `ended` на последнем):
+   - если есть следующий аят: увеличить номер, подсветить, smooth-scroll к нему, продолжить (тот же файл — без перезагрузки);
+   - если последний: `pause()`, бар остаётся, сохранить last ayah.
+4. Prev/next: seek к `timestamp_from` соседнего аята (кламп 1 … последний).
+5. Смена чтеца: те же сура+аят; новый chapter-файл; старт аята с его `timestamp_from`.
+6. ✕: `pause()`, `visible = false`, сбросить `activeWordIndex`.
+7. Уход с ридера текущей суры: как close (пауза + скрыть).
+8. Ошибки: короткий текст в баре + retry; автопереход не делать.
 
-Prefetch: not required beyond browser buffering of the single chapter file.
+Отдельный prefetch не нужен — браузер буферизует один файл суры.
 
 ### UI
 
-**Surah nav (top + bottom):**
+**Навбар суры (сверху и снизу):**
 
 `[ChevronLeft]  [Play|Pause]  [ChevronRight]`
 
-- Play opens bar and starts/resumes per rules above.
-- If already playing this surah, center button can toggle pause/resume (same Lucide icons).
+- Play открывает бар и стартует/продолжает по правилам выше.
+- Если эта сура уже играет — центральная кнопка toggle pause/resume (те же иконки Lucide).
 
-**Ayah row:** Lucide Play beside copy; starts that ayah.
+**Строка аята:** Lucide Play рядом с копированием; старт с этого аята.
 
-**Sticky bar:**
+**Sticky-бар:**
 
-- Top: thin progress for current ayah
-- Row: reciter select | SkipBack · Play/Pause · SkipForward | `surah:ayah` label | X
-- Safe-area padding; `z-index` above content, below critical modals if any (≈ 60–70)
-- Extra bottom padding on `.reader` / ayah list while `visible`
+- сверху: тонкий прогресс текущего аята;
+- ряд: выбор чтеца | SkipBack · Play/Pause · SkipForward | метка `сура:аят` | X;
+- safe-area; `z-index` выше контента, ниже критичных модалок (≈ 60–70);
+- доп. нижний отступ у `.reader` / списка аятов, пока `visible`.
 
-**Karaoke styling:**
+**Стили караоке:**
 
-- Playing ayah: `ayah--playing` (distinct from search `ayah--hit`)
-- Active word: stronger color / weight; other words in that ayah slightly muted
-- Respect `prefers-reduced-motion`: still switch active word, no extra motion
+- играющий аят: `ayah--playing` (отдельно от поиска `ayah--hit`);
+- активное слово: сильнее цвет/вес; остальные слова аята чуть приглушены;
+- `prefers-reduced-motion`: слово всё равно переключается, без лишней анимации.
 
-**i18n:** reciter names and aria-labels via existing `t()`.
+**i18n:** имена чтецов и aria-label через существующий `t()`.
 
-## Error handling
+## Ошибки
 
-- Network / 5xx on chapter fetch → bar error + retry
-- `audio` `error` event → same
-- Malformed segments → skip those entries; if none valid → ayah-level highlight only
-- Missing recitation for a chapter (shouldn’t happen for 1–114) → error state
+- сеть / 5xx при fetch chapter → ошибка в баре + retry;
+- событие `error` у `<audio>` → то же;
+- битые сегменты → пропускать; если валидных нет → только подсветка аята;
+- нет рецитации для главы (для 1–114 не ожидается) → error state.
 
-## Testing (manual)
+## Ручное тестирование
 
-1. Open a surah → Play in nav → bar appears, starts ayah 1 (or resumed), words highlight, autoscroll.
-2. Play on ayah 5 → starts there; karaoke works.
-3. Skip next/prev; end of surah pauses with bar open.
-4. Switch reciter mid-ayah → same ayah, new voice, karaoke still tracks.
-5. ✕ closes and pauses; reopen resumes from stored ayah.
-6. Mobile: bar clears home indicator; last ayah not hidden under bar.
-7. Search highlight `?a=` still works and doesn’t permanently fight `ayah--playing` (playing wins while active).
+1. Открыть суру → Play в навбаре → бар появляется, старт с 1 (или resume), слова подсвечиваются, автоскролл.
+2. Play на аяте 5 → старт оттуда; караоке работает.
+3. Skip next/prev; конец суры — пауза, бар открыт.
+4. Смена чтеца mid-ayah → тот же аят, новый голос, караоке синхронно.
+5. ✕ закрывает и ставит на паузу; повторный Play продолжает с сохранённого аята.
+6. Mobile: бар не перекрыт home indicator; последний аят не прячется под панелью.
+7. Подсветка поиска `?a=` не ломается; пока играет, приоритет у `ayah--playing`.
 
-## Implementation notes
+## Заметки по реализации
 
-- Prefer client components; audio must start from user gesture.
-- Do not add Howler/Wavesurfer in v1 — native `<audio>` is enough for chapter seek + `timeupdate`.
-- Keep provider scoped: wrap surah route layout or root layout; bar renders only when `visible` (and optionally only under `/quran/*`).
-- Filter segment tuples to length ≥ 3 before use.
-- Chapter files for long surahs are large; show subtle loading state on first play per surah/reciter.
+- Клиентские компоненты; `play()` только из жеста пользователя.
+- В v1 без Howler/Wavesurfer — хватит нативного `<audio>` + seek + `timeupdate`.
+- Provider: layout суры или root; бар рендерить при `visible` (и опционально только под `/quran/*`).
+- Сегменты длины &lt; 3 отфильтровывать.
+- Длинные суры = тяжёлые файлы; лёгкий loading при первом play на пару сура/чтец.
 
-## Open follow-ups (explicitly out of v1)
+## Потом (явно не v1)
 
-- Progress-bar scrubbing within ayah
-- More reciters
-- Next-surah autoplay
-- Offline / service worker caching
+- scrubbing прогресса внутри аята;
+- больше чтецов;
+- автоплей следующей суры;
+- офлайн / service worker кэш.
