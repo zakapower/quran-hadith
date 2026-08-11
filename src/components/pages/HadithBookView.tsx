@@ -108,14 +108,8 @@ export function HadithBookView() {
           )}
         </p>
         {!sections && !error ? (
-          <div
-            className="search-skel"
-            role="status"
-            aria-busy="true"
-            aria-live="polite"
-          >
-            <span className="sr-only">{t('Загрузка…', 'Loading…')}</span>
-            <div className="search-skel__bone" aria-hidden="true" />
+          <div className="search-skel" aria-hidden="true">
+            <div className="search-skel__bone" />
           </div>
         ) : (
           <form className="search" onSubmit={onSearchSubmit}>
@@ -143,10 +137,7 @@ export function HadithBookView() {
       )}
 
       {!sections && !error && (
-        <ReaderSkeleton
-          variant="chapters"
-          label={t('Загрузка…', 'Loading…')}
-        />
+        <ReaderSkeleton variant="chapters" />
       )}
 
       {sections && hadithNum && !hadithTarget && (

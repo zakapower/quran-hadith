@@ -1,13 +1,12 @@
 import { useEffect } from 'react'
 import {
   findReadingAnchorId,
-  restoreReaderAnchor,
   saveReaderAnchor,
 } from '../utils/scrollMemory'
 
 /**
- * Помнит, до какого аята/хадиса доскроллили, и восстанавливает при возврате.
- * `skip` — например, когда в URL задан ?a=...
+ * Сохраняет позицию чтения (на будущее / отладку).
+ * При входе в читалку всегда оставляем верх — кроме skip (?a= / ?h=).
  */
 export function useReaderScrollMemory(
   path: string | null,
@@ -46,6 +45,6 @@ export function useReaderScrollMemory(
 
   useEffect(() => {
     if (!path || !ready || skip) return
-    return restoreReaderAnchor(path)
+    window.scrollTo(0, 0)
   }, [path, ready, skip])
 }

@@ -10,12 +10,13 @@ const CHAPTER_WIDTHS = ['72%', '64%', '80%', '58%', '76%', '68%', '74%', '62%'] 
 
 type Props = {
   variant?: ReaderSkeletonVariant
-  label: string
 }
 
-export function ReaderSkeleton({ variant = 'hadith', label }: Props) {
+export function ReaderSkeleton({ variant = 'hadith' }: Props) {
   const isChapters = variant === 'chapters'
   const isSurah = variant === 'surah'
+  const isHadith = variant === 'hadith'
+  const showNav = isSurah || isHadith
   const count = isChapters ? 8 : 5
 
   return (
@@ -23,19 +24,25 @@ export function ReaderSkeleton({ variant = 'hadith', label }: Props) {
       className={`reader-skel reader-skel--${variant}`}
       role="status"
       aria-busy="true"
-      aria-live="polite"
+      aria-hidden="true"
     >
-      <span className="sr-only">{label}</span>
-
       {!isChapters && (
-        <header className="reader-skel__head" aria-hidden="true">
+        <header className="reader-skel__head">
           {isSurah && <div className="reader-skel__bone reader-skel__ar-title" />}
           <div className="reader-skel__bone reader-skel__title" />
-          {!isSurah && <div className="reader-skel__bone reader-skel__sub" />}
+          {isHadith && <div className="reader-skel__bone reader-skel__sub" />}
         </header>
       )}
 
-      <div className="reader-skel__list" aria-hidden="true">
+      {showNav && (
+        <div className="reader-skel__nav">
+          <div className="reader-skel__bone reader-skel__nav-btn" />
+          <div className="reader-skel__bone reader-skel__nav-meta" />
+          <div className="reader-skel__bone reader-skel__nav-btn" />
+        </div>
+      )}
+
+      <div className="reader-skel__list">
         {Array.from({ length: count }, (_, i) =>
           isChapters ? (
             <div key={i} className="reader-skel__chapter">
@@ -73,23 +80,41 @@ export function ReaderSkeleton({ variant = 'hadith', label }: Props) {
               />
             </div>
           ) : (
-            <div key={i} className="reader-skel__card">
+            <div key={i} className="reader-skel__card reader-skel__card--hadith">
               <div className="reader-skel__card-top">
                 <div className="reader-skel__bone reader-skel__badge" />
                 <div className="reader-skel__bone reader-skel__icon" />
               </div>
+              <div className="reader-skel__ayah-ar">
+                <div
+                  className="reader-skel__bone reader-skel__line reader-skel__line--ar"
+                  style={{ width: AR_WIDTHS[i % AR_WIDTHS.length] }}
+                />
+                <div
+                  className="reader-skel__bone reader-skel__line reader-skel__line--ar"
+                  style={{ width: AR_WIDTHS[(i + 3) % AR_WIDTHS.length] }}
+                />
+              </div>
               <div
-                className="reader-skel__bone reader-skel__line"
+                className="reader-skel__bone reader-skel__line reader-skel__line--tr"
                 style={{ width: LINE_WIDTHS[i % LINE_WIDTHS.length] }}
               />
               <div
-                className="reader-skel__bone reader-skel__line reader-skel__line--sm"
+                className="reader-skel__bone reader-skel__line reader-skel__line--tr reader-skel__line--sm"
                 style={{ width: LINE_WIDTHS[(i + 2) % LINE_WIDTHS.length] }}
               />
             </div>
           ),
         )}
       </div>
+
+      {showNav && (
+        <div className="reader-skel__nav reader-skel__nav--bottom">
+          <div className="reader-skel__bone reader-skel__nav-btn" />
+          <div className="reader-skel__bone reader-skel__nav-meta" />
+          <div className="reader-skel__bone reader-skel__nav-btn" />
+        </div>
+      )}
     </div>
   )
 }

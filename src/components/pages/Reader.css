@@ -65,7 +65,13 @@
 .ayah--hit {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.ayah--hit .ayah__copy {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  /* Как у обычных: фон кнопки = фон карточки, иначе scale выглядит как скачок */
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  color: var(--muted);
 }
 
 .ayah__top {
@@ -97,6 +103,7 @@
   justify-content: center;
   padding: 0;
   flex-shrink: 0;
+  transform: translateZ(0);
   transition:
     color 0.22s ease,
     border-color 0.22s ease,
@@ -105,17 +112,24 @@
     box-shadow 0.22s ease;
 }
 
-.ayah__copy:hover {
-  color: var(--ink);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-  transform: scale(1.04);
-  box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
-}
-
 .ayah__copy:active {
-  transform: scale(0.94);
+  transform: translateZ(0) scale(0.96);
   box-shadow: none;
   transition-duration: 0.1s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ayah__copy:hover {
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+    transform: translateZ(0) scale(1.03);
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+
+  .ayah--hit .ayah__copy:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  }
 }
 
 .ayah__copy--done {
@@ -188,6 +202,7 @@
   );
   line-height: 1.9;
   color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 .ayah__tr {
@@ -195,19 +210,80 @@
   color: var(--muted);
   font-size: calc(1.02rem * var(--reader-tr-scale, 1));
   line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .reader__nav {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   margin-top: 2rem;
 }
 
-.reader__nav a {
-  color: var(--accent);
+.reader__nav--top {
+  margin-top: 0;
+  margin-bottom: 1.35rem;
+}
+
+.reader__nav-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
+  flex-shrink: 0;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.reader__nav-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block;
+}
+
+.reader__nav-btn:active {
+  transform: scale(0.96);
+  box-shadow: none;
+  transition-duration: 0.1s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .reader__nav-btn:hover {
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+    transform: scale(1.04);
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+}
+
+.reader__nav-btn--ghost {
+  visibility: hidden;
+  pointer-events: none;
+  border: 0;
+  background: transparent;
+}
+
+.reader__nav-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
 }
 
 @keyframes in {
@@ -218,5 +294,64 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .reader {
+    padding: 1.25rem max(0.9rem, env(safe-area-inset-right, 0px))
+      3rem max(0.9rem, env(safe-area-inset-left, 0px));
+  }
+
+  .reader__crumb {
+    margin-bottom: 1rem;
+    gap: 0.35rem;
+  }
+
+  .reader__crumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.25rem 0.15rem;
+  }
+
+  .ayah {
+    padding: 1rem 0.9rem 1.05rem;
+    /* Двухрядный sticky header + запас */
+    scroll-margin-top: 8.5rem;
+  }
+
+  .ayah__copy {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .reader__nav {
+    gap: 0.55rem;
+  }
+
+  .reader__nav--top {
+    margin-bottom: 1.1rem;
+  }
+
+  .reader__nav-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .reader__nav-meta {
+    font-size: 0.82rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader__nav-btn {
+    transition: none;
+  }
+
+  .reader__nav-btn:hover,
+  .reader__nav-btn:active {
+    transform: none;
+    box-shadow: none;
   }
 }

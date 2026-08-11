@@ -3,6 +3,7 @@ const RESTORE = 'tilawah:restore:'
 const ANCHOR = 'tilawah:anchor:'
 const LAST_SURAH = 'tilawah:lastSurah'
 const LAST_HADITH = 'tilawah:lastHadith'
+const SKIP_READER_RESTORE = 'tilawah:skipReaderRestore'
 
 // Полная загрузка страницы (не SPA): не прыгаем по старому «restore»
 try {
@@ -109,6 +110,26 @@ export function peekReaderAnchor(path: string) {
   }
 }
 
+/** Prev/next в читалке: не восстанавливать старую позицию. */
+export function markSkipReaderRestore() {
+  try {
+    sessionStorage.setItem(SKIP_READER_RESTORE, '1')
+  } catch {
+    /* ignore */
+  }
+}
+
+function consumeSkipReaderRestore() {
+  try {
+    const key = SKIP_READER_RESTORE
+    if (sessionStorage.getItem(key) !== '1') return false
+    sessionStorage.removeItem(key)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function restoreListScroll(path: string, anchorId?: string | null) {
   const y = peekListScroll(path)
 
@@ -179,6 +200,11 @@ export function findReadingAnchorId(selector = '.ayah-list .ayah[id]') {
 }
 
 export function restoreReaderAnchor(path: string) {
+  if (consumeSkipReaderRestore()) {
+    window.scrollTo(0, 0)
+    return () => {}
+  }
+
   const anchorId = peekReaderAnchor(path)
   const y = peekListScroll(path)
   if (!anchorId && y <= 0) return () => {}

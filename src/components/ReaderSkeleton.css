@@ -1,18 +1,19 @@
 .reader-skel {
-  margin-top: 0.25rem;
+  margin-top: 0;
 }
 
+/* Как у .card-list */
 .reader-skel--chapters {
-  /* Как у .card-list после поиска на странице сборника */
   margin-top: 1rem;
 }
 
+/* Как у .reader__head */
 .reader-skel__head {
   margin-bottom: 1.75rem;
   text-align: center;
   display: grid;
   justify-items: center;
-  gap: 0.55rem;
+  gap: 0;
 }
 
 .reader-skel__list {
@@ -37,38 +38,71 @@
   animation: reader-skel-shimmer 1.55s ease-in-out infinite;
 }
 
+/* Как у .reader__ar-title */
 .reader-skel__ar-title {
   width: min(14rem, 68%);
   height: clamp(1.8rem, 5vw, 2.4rem);
   border-radius: 0.55rem;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.5rem;
 }
 
+/* Как у .reader__head h1 */
 .reader-skel__title {
   width: min(16rem, 72%);
   height: clamp(1.4rem, 3.5vw, 1.85rem);
 }
 
 .reader-skel--surah .reader-skel__title {
-  width: min(12rem, 58%);
+  width: min(13rem, 62%);
 }
 
+.reader-skel--hadith .reader-skel__title {
+  width: min(14rem, 70%);
+}
+
+/* Как у .reader__sub */
 .reader-skel__sub {
-  width: min(9rem, 40%);
-  height: 0.85rem;
-  opacity: 0.85;
+  width: min(10rem, 48%);
+  height: 0.95rem;
+  margin-top: 0.4rem;
+  opacity: 0.88;
 }
 
+/* Как у .reader__nav / .reader__nav--top */
+.reader-skel__nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1.35rem;
+}
+
+.reader-skel__nav--bottom {
+  margin: 2rem 0 0;
+}
+
+.reader-skel__nav-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.45rem;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.reader-skel__nav-meta {
+  width: min(9.5rem, 42%);
+  height: 0.9rem;
+  border-radius: 0.35rem;
+  opacity: 0.88;
+}
+
+/* Как у .ayah */
 .reader-skel__card {
   padding: 1.1rem 1.1rem 1.2rem;
   border: 1px solid var(--line);
   border-radius: 0.65rem;
   background: var(--surface);
   display: grid;
-  gap: 0.55rem;
-}
-
-.reader-skel__card--ayah {
   gap: 0;
 }
 
@@ -76,6 +110,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.55rem;
 }
 
@@ -84,10 +119,13 @@
   height: 0.8rem;
 }
 
+/* Как у .ayah__copy */
 .reader-skel__icon {
   width: 2rem;
   height: 2rem;
   border-radius: 0.4rem;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
 }
 
 .reader-skel__ayah-ar {
@@ -105,6 +143,7 @@
 .reader-skel__line--sm {
   height: 0.8rem;
   opacity: 0.9;
+  margin-top: 0.35rem;
 }
 
 .reader-skel__line--ar {
@@ -115,8 +154,10 @@
 .reader-skel__line--tr {
   height: 1.02rem;
   opacity: 0.88;
+  justify-self: start;
 }
 
+/* Как у .card-list li a */
 .reader-skel__chapter {
   display: grid;
   grid-template-columns: 2.5rem 1fr;
@@ -129,19 +170,25 @@
 }
 
 .reader-skel__num {
-  width: 1.5rem;
-  height: 0.9rem;
+  width: 1.35rem;
+  height: 0.85rem;
   margin-top: 0.2rem;
 }
 
 .reader-skel__chapter-body {
   display: grid;
-  gap: 0.4rem;
-  padding-top: 0.1rem;
+  gap: 0.25rem;
+  padding-top: 0.05rem;
 }
 
 .reader-skel__chapter-body .reader-skel__line {
-  height: 1rem;
+  height: 1.05rem;
+}
+
+.reader-skel__chapter-body .reader-skel__line--sm {
+  height: 0.9rem;
+  margin-top: 0;
+  opacity: 0.88;
 }
 
 @keyframes reader-skel-shimmer {
@@ -159,6 +206,40 @@
   }
 }
 
+@media (max-width: 720px) {
+  .reader-skel__nav {
+    margin-bottom: 1.1rem;
+    gap: 0.75rem;
+  }
+
+  .reader-skel__nav--bottom {
+    margin-top: 2rem;
+  }
+
+  .reader-skel__nav-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .reader-skel__card {
+    padding: 1rem 0.9rem 1.05rem;
+  }
+
+  .reader-skel__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .reader-skel--chapters {
+    margin-top: 1rem;
+  }
+
+  .reader-skel__chapter {
+    padding: 0.95rem 0.9rem;
+    min-height: 3.25rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reader-skel__bone {
     animation: none;
@@ -166,4 +247,3 @@
     opacity: 0.85;
   }
 }
-

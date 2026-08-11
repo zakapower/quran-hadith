@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { fetchSurah } from '@/api/quran'
 import type { SurahContent } from '@/data/types'
 import { surahTitleRu } from '@/data/surahNamesRu'
@@ -12,6 +13,50 @@ import { ReaderSkeleton } from '@/components/ReaderSkeleton'
 import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
 import { useApp } from '@/context/AppContext'
 import './Reader.css'
+
+function SurahNav({
+  n,
+  top = false,
+}: {
+  n: number
+  top?: boolean
+}) {
+  const { t } = useApp()
+  return (
+    <nav
+      className={`reader__nav${top ? ' reader__nav--top' : ''}`}
+      aria-label={t('Суры', 'Surahs')}
+    >
+      {n > 1 ? (
+        <Link
+          className="reader__nav-btn"
+          href={`/quran/${n - 1}`}
+          aria-label={t('Предыдущая сура', 'Previous surah')}
+          title={t('Предыдущая сура', 'Previous surah')}
+        >
+          <ChevronLeft strokeWidth={2.25} aria-hidden="true" />
+        </Link>
+      ) : (
+        <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
+      )}
+      <p className="reader__nav-meta">
+        {t(`Сура ${n} из 114`, `Surah ${n} of 114`)}
+      </p>
+      {n < 114 ? (
+        <Link
+          className="reader__nav-btn"
+          href={`/quran/${n + 1}`}
+          aria-label={t('Следующая сура', 'Next surah')}
+          title={t('Следующая сура', 'Next surah')}
+        >
+          <ChevronRight strokeWidth={2.25} aria-hidden="true" />
+        </Link>
+      ) : (
+        <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
+      )}
+    </nav>
+  )
+}
 
 export function SurahView() {
   const params = useParams<{ number: string }>()
@@ -87,10 +132,7 @@ export function SurahView() {
         </p>
       )}
       {!surah && !error && (
-        <ReaderSkeleton
-          variant="surah"
-          label={t('Загрузка…', 'Loading…')}
-        />
+        <ReaderSkeleton variant="surah" />
       )}
 
       {surah && title && (
@@ -99,9 +141,7 @@ export function SurahView() {
             <p className="reader__ar-title" dir="rtl" lang="ar">
               {surah.name}
             </p>
-            <h1>
-              {surah.number}. {title}
-            </h1>
+            <h1>{title}</h1>
             {highlight && (
               <p className="reader__sub">
                 {highlight.from === highlight.to
@@ -113,6 +153,8 @@ export function SurahView() {
               </p>
             )}
           </header>
+
+          <SurahNav n={n} top />
 
           <div className="ayah-list">
             {surah.ayahsArabic.map((a, i) => {
@@ -143,18 +185,7 @@ export function SurahView() {
             })}
           </div>
 
-          <nav className="reader__nav">
-            {n > 1 && (
-              <Link href={`/quran/${n - 1}`}>
-                ← {t('Предыдущая', 'Previous')}
-              </Link>
-            )}
-            {n < 114 && (
-              <Link href={`/quran/${n + 1}`}>
-                {t('Следующая', 'Next')} →
-              </Link>
-            )}
-          </nav>
+          <SurahNav n={n} />
         </>
       )}
     </div>

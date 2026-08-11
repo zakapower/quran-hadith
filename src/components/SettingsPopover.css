@@ -97,14 +97,32 @@
   cursor: pointer;
 }
 
-.settings__reset:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
-}
-
 .settings__reset:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .settings__reset:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  }
+}
+
+@media (max-width: 720px) {
+  .settings__panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 7.25rem);
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    left: max(0.75rem, env(safe-area-inset-left, 0px));
+    width: auto;
+    max-width: none;
+  }
+
+  .settings__reset {
+    min-height: 2.75rem;
+    padding: 0.7rem 0.85rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

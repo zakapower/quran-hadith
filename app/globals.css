@@ -72,6 +72,7 @@ html::-webkit-scrollbar {
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font);
   font-size: 17px;
   line-height: 1.55;
@@ -84,6 +85,7 @@ body {
     ),
     var(--bg);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 button,
@@ -93,6 +95,7 @@ input {
 
 .app-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -106,7 +109,9 @@ main {
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  padding: 1.5rem 1rem 2rem;
+  padding: 1.5rem 1rem max(2rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
   color: var(--muted);
   font-size: 0.85rem;
   border-top: 1px solid var(--line);
@@ -122,4 +127,91 @@ button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* На таче :hover залипает — любые hover-эффекты только у мыши */
+@media (hover: none), (pointer: coarse) {
+  .btn:hover,
+  .btn--ghost:hover,
+  .ctrl:hover,
+  .ayah__copy:hover,
+  .ayah--hit .ayah__copy:hover,
+  .reader__nav-btn:hover,
+  .card-list li a:hover,
+  .settings__reset:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+    filter: none;
+    color: inherit;
+    border-color: var(--line);
+    background: var(--surface);
+  }
+
+  .btn:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: transparent;
+  }
+
+  .btn--ghost:hover {
+    background: var(--surface);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  .ayah--hit .ayah__copy:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    color: var(--muted);
+  }
+
+  .settings__reset:hover:not(:disabled) {
+    background: transparent;
+    color: var(--ink);
+  }
+}
+
+html[data-touch='1'] .btn:hover,
+html[data-touch='1'] .btn--ghost:hover,
+html[data-touch='1'] .ctrl:hover,
+html[data-touch='1'] .ayah__copy:hover,
+html[data-touch='1'] .ayah--hit .ayah__copy:hover,
+html[data-touch='1'] .reader__nav-btn:hover,
+html[data-touch='1'] .card-list li a:hover,
+html[data-touch='1'] .settings__reset:hover:not(:disabled) {
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  color: inherit !important;
+  border-color: var(--line) !important;
+  background: var(--surface) !important;
+}
+
+html[data-touch='1'] .btn:hover {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  border-color: transparent !important;
+}
+
+html[data-touch='1'] .btn--ghost:hover {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-touch='1'] .ayah--hit .ayah__copy:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line)) !important;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface)) !important;
+  color: var(--muted) !important;
+}
+
+html[data-touch='1'] .settings__reset:hover:not(:disabled) {
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+
+html[data-touch='1'] .ctrl:hover,
+html[data-touch='1'] .ayah__copy:hover,
+html[data-touch='1'] .reader__nav-btn:hover {
+  color: var(--muted) !important;
 }

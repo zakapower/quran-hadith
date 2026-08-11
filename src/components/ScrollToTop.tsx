@@ -16,8 +16,8 @@ function fromReaderToList(from: string, to: string) {
 }
 
 /**
- * Как у Bayān: при смене вкладки — наверх.
- * Исключение: возврат из читалки на список (там scrollMemory).
+ * При смене маршрута — наверх.
+ * Исключение: возврат из читалки на список (там scrollMemory списка).
  */
 export function ScrollToTop() {
   const pathname = usePathname()

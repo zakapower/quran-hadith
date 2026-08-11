@@ -130,3 +130,9 @@ body.is-overlay-dragging .overlay-scrollbar__arrow {
     transition: none;
   }
 }
+
+@media (pointer: coarse) {
+  .overlay-scrollbar {
+    display: none;
+  }
+}

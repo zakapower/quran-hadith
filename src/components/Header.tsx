@@ -2,10 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { SiGithub } from '@icons-pack/react-simple-icons'
 import { BookOpen, Moon, Sun } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { SettingsPopover } from './SettingsPopover'
 import './Header.css'
+
+const GITHUB_URL = 'https://github.com/zakapower'
 
 export function Header() {
   const { lang, theme, toggleLang, toggleTheme, t } = useApp()
@@ -39,20 +42,34 @@ export function Header() {
         </nav>
 
         <div className="site-controls">
+          <a
+            className="ctrl"
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t('GitHub', 'GitHub')}
+          >
+            <SiGithub
+              className="ctrl__icon"
+              color="currentColor"
+              size={18}
+              title=""
+              aria-hidden
+            />
+          </a>
           <button
             type="button"
-            className={`ctrl${lang === 'en' ? ' ctrl--lang-en' : ''}`}
+            className="ctrl"
             onClick={toggleLang}
             aria-label={t('Switch to English', 'Переключить на русский')}
           >
-            <span className="ctrl__stack" aria-hidden="true">
-              <span className="ctrl__face ctrl__face--en">EN</span>
-              <span className="ctrl__face ctrl__face--ru">RU</span>
+            <span className="ctrl__label" aria-hidden="true">
+              {lang === 'ru' ? 'EN' : 'RU'}
             </span>
           </button>
           <button
             type="button"
-            className={`ctrl${theme === 'dark' ? ' ctrl--theme-dark' : ''}`}
+            className="ctrl"
             onClick={toggleTheme}
             aria-label={
               theme === 'light'
@@ -60,10 +77,11 @@ export function Header() {
                 : t('Светлая тема', 'Light theme')
             }
           >
-            <span className="ctrl__stack" aria-hidden="true">
-              <Moon className="ctrl__face ctrl__face--moon" strokeWidth={2} />
-              <Sun className="ctrl__face ctrl__face--sun" strokeWidth={2} />
-            </span>
+            {theme === 'light' ? (
+              <Moon className="ctrl__icon" strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <Sun className="ctrl__icon" strokeWidth={2} aria-hidden="true" />
+            )}
           </button>
           <SettingsPopover />
         </div>
