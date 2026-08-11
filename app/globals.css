@@ -19,10 +19,7 @@
 @font-face {
   font-family: 'UthmanicHafs';
   src:
-    url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2')
-      format('woff2'),
-    url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf')
-      format('truetype');
+    url('/fonts/UthmanicHafs1Ver18.woff2') format('woff2');
   font-display: swap;
   font-style: normal;
   font-weight: 400;

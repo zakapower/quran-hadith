@@ -51,10 +51,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <link rel="preconnect" href="https://verses.quran.foundation" crossOrigin="" />
         <link
           rel="preload"
-          href="https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2"
+          href="/fonts/UthmanicHafs1Ver18.woff2"
           as="font"
           type="font/woff2"
           crossOrigin=""
