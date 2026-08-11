@@ -444,44 +444,47 @@
 
   .quran-player__mini {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.45rem;
     max-width: 52rem;
     margin: 0 auto;
   }
 
+  .quran-player__mini .quran-player__btn {
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+
   .quran-player__mini .quran-player__btn--main {
-    width: 3rem;
-    height: 3rem;
+    width: 2.85rem;
+    height: 2.85rem;
+  }
+
+  .quran-player__mini-transport {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    justify-self: center;
   }
 
   .quran-player__mini-actions {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
     justify-self: end;
   }
 
-  .quran-player__mini .quran-player__btn {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .quran-player__ref--open {
-    appearance: none;
-    border: none;
-    background: transparent;
-    padding: 0.35rem 0.15rem;
-    min-height: 2.75rem;
-    min-width: 0;
-    cursor: pointer;
-    text-align: left;
-    font: inherit;
-    font-size: 0.9rem;
+  .quran-player__ref--mini {
+    display: block;
+    min-width: 2.4rem;
+    padding: 0.25rem 0.1rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    color: var(--ink);
+    color: var(--muted);
     font-variant-numeric: tabular-nums;
+    line-height: 1;
   }
 
   .quran-player-sheet-root {
@@ -505,7 +508,7 @@
     right: 0;
     bottom: 0;
     z-index: 81;
-    max-height: min(70vh, 32rem);
+    max-height: min(50vh, 22rem);
     overflow: auto;
     padding: 0.65rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
     border-radius: 1rem 1rem 0 0;
@@ -530,7 +533,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
   }
 
   .quran-player-sheet__title {
@@ -540,50 +543,13 @@
     letter-spacing: -0.02em;
   }
 
-  .quran-player-sheet__ref {
-    margin: 0 0 1rem;
-    font-size: 1.35rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    text-align: center;
-  }
-
-  .quran-player-sheet__transport {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .quran-player-sheet__transport .quran-player__btn {
-    width: 2.75rem;
-    height: 2.75rem;
-  }
-
-  .quran-player-sheet__transport .quran-player__btn--main {
-    width: 3.25rem;
-    height: 3.25rem;
-  }
-
   .quran-player-sheet__reciters {
     display: grid;
     gap: 0.4rem;
   }
 
-  .quran-player-sheet__reciters-title {
-    margin: 0 0.15rem 0.25rem;
-    font-family: var(--font-display);
-    font-size: 0.92rem;
-    letter-spacing: -0.02em;
-  }
-
   .quran-player-sheet .quran-player__reciter-option {
     min-height: 2.75rem;
-  }
-
-  .quran-player-sheet__error {
-    margin-top: 0.85rem;
   }
 }
 

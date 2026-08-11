@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
+import { IBM_Plex_Sans, Literata } from 'next/font/google'
 import { AppProvider } from '@/context/AppContext'
 import { QuranAudioProvider } from '@/context/QuranAudioContext'
 import { Header } from '@/components/Header'
@@ -9,6 +10,21 @@ import { ScrollToTop } from '@/components/ScrollToTop'
 import { getRequestLang } from '@/lib/request-lang'
 import { getSiteOrigin } from '@/lib/site'
 import './globals.css'
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-sans',
+})
+
+const literata = Literata({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-display-face',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
@@ -29,10 +45,12 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const lang = await getRequestLang()
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html
+      lang={lang}
+      className={`${ibmPlexSans.variable} ${literata.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="preconnect" href="https://verses.quran.foundation" crossOrigin="" />
         <link
           rel="preload"
@@ -41,13 +59,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           type="font/woff2"
           crossOrigin=""
         />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var th=localStorage.getItem('qh-theme');if(th!=='dark'&&th!=='light'){th='dark'}document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th;var href=th==='dark'?'/favicon-dark.svg?v=5':'/favicon-light.svg?v=5';document.querySelectorAll("link[rel='icon'],link[rel='shortcut icon']").forEach(function(n){n.remove()});var link=document.createElement('link');link.id='site-favicon';link.rel='icon';link.type='image/svg+xml';link.href=href;document.head.appendChild(link);var coarse=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;var touch=('ontouchstart' in window)||navigator.maxTouchPoints>0;if(coarse||touch){document.documentElement.setAttribute('data-touch','1')}var mark=function(){document.documentElement.setAttribute('data-touch','1')};window.addEventListener('touchstart',mark,{once:true,passive:true});window.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||e.pointerType==='pen')mark()},{once:true,passive:true})}catch(e){}})()`,
+            __html: `(function(){try{var th=localStorage.getItem('qh-theme');if(th!=='dark'&&th!=='light'){th='dark'}document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th;if(localStorage.getItem('qh-reduce-motion')==='1'){document.documentElement.setAttribute('data-reduce-motion','1')}var href=th==='dark'?'/favicon-dark.svg?v=5':'/favicon-light.svg?v=5';document.querySelectorAll("link[rel='icon'],link[rel='shortcut icon']").forEach(function(n){n.remove()});var link=document.createElement('link');link.id='site-favicon';link.rel='icon';link.type='image/svg+xml';link.href=href;document.head.appendChild(link);var coarse=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;var touch=('ontouchstart' in window)||navigator.maxTouchPoints>0;if(coarse||touch){document.documentElement.setAttribute('data-touch','1')}var mark=function(){document.documentElement.setAttribute('data-touch','1')};window.addEventListener('touchstart',mark,{once:true,passive:true});window.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||e.pointerType==='pen')mark()},{once:true,passive:true})}catch(e){}})()`,
           }}
         />
       </head>

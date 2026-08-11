@@ -36,9 +36,18 @@ export function ReaderSkeleton({ variant = 'hadith' }: Props) {
 
       {showNav && (
         <div className="reader-skel__nav">
-          <div className="reader-skel__bone reader-skel__nav-btn" />
-          <div className="reader-skel__bone reader-skel__nav-meta" />
-          <div className="reader-skel__bone reader-skel__nav-btn" />
+          {isSurah && (
+            <div className="reader-skel__bone reader-skel__nav-meta" />
+          )}
+          <div className="reader-skel__nav-row">
+            <div className="reader-skel__bone reader-skel__nav-btn" />
+            {isSurah ? (
+              <div className="reader-skel__bone reader-skel__nav-btn" />
+            ) : (
+              <div className="reader-skel__bone reader-skel__nav-meta" />
+            )}
+            <div className="reader-skel__bone reader-skel__nav-btn" />
+          </div>
         </div>
       )}
 
@@ -111,7 +120,11 @@ export function ReaderSkeleton({ variant = 'hadith' }: Props) {
       {showNav && (
         <div className="reader-skel__nav reader-skel__nav--bottom">
           <div className="reader-skel__bone reader-skel__nav-btn" />
-          <div className="reader-skel__bone reader-skel__nav-meta" />
+          {isSurah ? (
+            <span className="reader-skel__nav-spacer" aria-hidden="true" />
+          ) : (
+            <div className="reader-skel__bone reader-skel__nav-meta" />
+          )}
           <div className="reader-skel__bone reader-skel__nav-btn" />
         </div>
       )}

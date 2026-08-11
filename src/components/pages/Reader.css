@@ -256,8 +256,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ayah__copy,
   .ayah__copy-icon,
-  .ayah__play,
-  .ayah__word {
+  .ayah__play {
     transition: none;
   }
 
@@ -281,16 +280,7 @@
   overflow-wrap: anywhere;
 }
 
-.ayah__word {
-  transition: color 0.12s ease, opacity 0.12s ease;
-}
-
-.ayah--playing .ayah__word {
-  opacity: 0.45;
-}
-
-.ayah--playing .ayah__word--active {
-  opacity: 1;
+.ayah--playing.ayah--live .ayah__word--active {
   color: var(--accent);
 }
 

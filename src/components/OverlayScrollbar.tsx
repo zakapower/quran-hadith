@@ -7,6 +7,8 @@ const HIDE_DELAY_MS = 900
 const MIN_THUMB = 36
 const ARROW = 20
 const STEP = 72
+/** Ignore ResizeObserver noise smaller than this (px) to avoid thumb jitter. */
+const SIZE_EPS = 8
 
 export function OverlayScrollbar() {
   const [needed, setNeeded] = useState(false)
@@ -15,10 +17,12 @@ export function OverlayScrollbar() {
   const thumbRef = useRef<HTMLButtonElement>(null)
   const hideTimer = useRef(0)
   const raf = useRef(0)
+  const resizeRaf = useRef(0)
   const drag = useRef<{ startY: number; startTop: number } | null>(null)
   const hovering = useRef(false)
   const holdTimer = useRef(0)
   const holdInterval = useRef(0)
+  const lastSize = useRef({ view: 0, total: 0 })
   const metrics = useRef({
     view: 0,
     total: 0,
@@ -32,18 +36,25 @@ export function OverlayScrollbar() {
     function applyThumb(top: number, height: number) {
       const thumb = thumbRef.current
       if (!thumb) return
+      // Skip no-op style writes (common source of visual flicker).
+      if (
+        thumb.style.top === `${top}px` &&
+        thumb.style.height === `${height}px`
+      ) {
+        return
+      }
       thumb.style.top = `${top}px`
       thumb.style.height = `${height}px`
     }
 
-    function measure(updateNeeded = false) {
+    function measure() {
       const view = root.clientHeight
       const total = root.scrollHeight
       const canScroll = total > view + 1
       metrics.current.view = view
       metrics.current.total = total
-
-      if (updateNeeded) setNeeded(canScroll)
+      lastSize.current = { view, total }
+      setNeeded((prev) => (prev === canScroll ? prev : canScroll))
 
       if (!canScroll) {
         setActive(false)
@@ -52,7 +63,11 @@ export function OverlayScrollbar() {
 
       const track = Math.max(0, view - ARROW * 2)
       const ratio = view / total
-      const height = Math.max(MIN_THUMB, Math.round(track * ratio))
+      const rawHeight = Math.max(MIN_THUMB, Math.round(track * ratio))
+      // Hysteresis: ignore 1–2px thumb height flicker from layout noise.
+      const prevHeight = metrics.current.thumbHeight
+      const height =
+        Math.abs(rawHeight - prevHeight) <= 2 ? prevHeight : rawHeight
       const maxTop = Math.max(0, track - height)
       const top =
         total === view
@@ -80,27 +95,41 @@ export function OverlayScrollbar() {
       if (raf.current) return
       raf.current = window.requestAnimationFrame(() => {
         raf.current = 0
-        measure(false)
+        measure()
         show()
       })
     }
 
-    measure(true)
+    measure()
 
     function onResize() {
-      measure(true)
+      if (resizeRaf.current) return
+      resizeRaf.current = window.requestAnimationFrame(() => {
+        resizeRaf.current = 0
+        const view = root.clientHeight
+        const total = root.scrollHeight
+        if (
+          lastSize.current.view !== 0 &&
+          Math.abs(view - lastSize.current.view) < SIZE_EPS &&
+          Math.abs(total - lastSize.current.total) < SIZE_EPS
+        ) {
+          return
+        }
+        measure()
+      })
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize)
     const ro = new ResizeObserver(onResize)
-    ro.observe(document.body)
+    ro.observe(document.documentElement)
 
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
       ro.disconnect()
       window.cancelAnimationFrame(raf.current)
+      window.cancelAnimationFrame(resizeRaf.current)
       window.clearTimeout(hideTimer.current)
       window.clearTimeout(holdTimer.current)
       window.clearInterval(holdInterval.current)

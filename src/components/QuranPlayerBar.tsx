@@ -256,29 +256,43 @@ export function QuranPlayerBar() {
         </div>
 
         <div className="quran-player__mini">
-          <button
-            type="button"
-            className="quran-player__ref quran-player__ref--open"
-            onClick={() => setSheetOpen(true)}
-            aria-expanded={sheetOpen}
-            aria-controls={sheetId}
-          >
+          <span className="quran-player__ref quran-player__ref--mini" aria-live="polite">
             {refLabel}
-          </button>
+          </span>
 
-          <button
-            type="button"
-            className={`quran-player__btn quran-player__btn--main${
-              playing ? ' quran-player__btn--playing' : ''
-            }`}
-            onClick={togglePause}
-            aria-label={
-              playing ? t('Пауза', 'Pause') : t('Слушать', 'Play')
-            }
-            disabled={loading}
-          >
-            <PlayPauseIcons playing={playing} />
-          </button>
+          <div className="quran-player__mini-transport">
+            <button
+              type="button"
+              className="quran-player__btn"
+              onClick={prevAyah}
+              aria-label={t('Предыдущий аят', 'Previous ayah')}
+              disabled={loading}
+            >
+              <SkipBack strokeWidth={2} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={`quran-player__btn quran-player__btn--main${
+                playing ? ' quran-player__btn--playing' : ''
+              }`}
+              onClick={togglePause}
+              aria-label={
+                playing ? t('Пауза', 'Pause') : t('Слушать', 'Play')
+              }
+              disabled={loading}
+            >
+              <PlayPauseIcons playing={playing} />
+            </button>
+            <button
+              type="button"
+              className="quran-player__btn"
+              onClick={nextAyah}
+              aria-label={t('Следующий аят', 'Next ayah')}
+              disabled={loading}
+            >
+              <SkipForward strokeWidth={2} aria-hidden="true" />
+            </button>
+          </div>
 
           <div className="quran-player__mini-actions">
             <button
@@ -287,7 +301,7 @@ export function QuranPlayerBar() {
               onClick={() => setSheetOpen(true)}
               aria-expanded={sheetOpen}
               aria-controls={sheetId}
-              aria-label={t('Открыть плеер', 'Open player')}
+              aria-label={t('Чтец', 'Reciter')}
             >
               <ChevronUp strokeWidth={2} aria-hidden="true" />
             </button>
@@ -310,7 +324,7 @@ export function QuranPlayerBar() {
           <button
             type="button"
             className="quran-player-sheet__backdrop"
-            aria-label={t('Свернуть плеер', 'Collapse player')}
+            aria-label={t('Закрыть', 'Close')}
             onClick={() => setSheetOpen(false)}
           />
           <div
@@ -318,59 +332,21 @@ export function QuranPlayerBar() {
             className="quran-player-sheet"
             role="dialog"
             aria-modal="true"
-            aria-label={t('Плеер', 'Player')}
+            aria-label={t('Чтец', 'Reciter')}
           >
             <div className="quran-player-sheet__handle" aria-hidden="true" />
             <div className="quran-player-sheet__head">
               <h2 className="quran-player-sheet__title">
-                {t('Плеер', 'Player')}
+                {t('Чтец', 'Reciter')}
               </h2>
               <button
                 ref={sheetCloseRef}
                 type="button"
                 className="quran-player__btn"
                 onClick={() => setSheetOpen(false)}
-                aria-label={t('Свернуть плеер', 'Collapse player')}
+                aria-label={t('Закрыть', 'Close')}
               >
                 <X strokeWidth={2} aria-hidden="true" />
-              </button>
-            </div>
-
-            <p className="quran-player-sheet__ref" aria-live="polite">
-              {refLabel}
-            </p>
-
-            <div className="quran-player-sheet__transport">
-              <button
-                type="button"
-                className="quran-player__btn"
-                onClick={prevAyah}
-                disabled={loading}
-                aria-label={t('Предыдущий аят', 'Previous ayah')}
-              >
-                <SkipBack strokeWidth={2} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className={`quran-player__btn quran-player__btn--main${
-                  playing ? ' quran-player__btn--playing' : ''
-                }`}
-                onClick={togglePause}
-                disabled={loading}
-                aria-label={
-                  playing ? t('Пауза', 'Pause') : t('Слушать', 'Play')
-                }
-              >
-                <PlayPauseIcons playing={playing} />
-              </button>
-              <button
-                type="button"
-                className="quran-player__btn"
-                onClick={nextAyah}
-                disabled={loading}
-                aria-label={t('Следующий аят', 'Next ayah')}
-              >
-                <SkipForward strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
 
@@ -379,9 +355,6 @@ export function QuranPlayerBar() {
               role="listbox"
               aria-label={t('Чтецы', 'Reciters')}
             >
-              <p className="quran-player-sheet__reciters-title">
-                {t('Чтец', 'Reciter')}
-              </p>
               {RECITERS.map((r) => {
                 const selected = r.id === reciterId
                 return (
@@ -393,7 +366,10 @@ export function QuranPlayerBar() {
                     className={`quran-player__reciter-option${
                       selected ? ' is-selected' : ''
                     }`}
-                    onClick={() => setReciter(r.id)}
+                    onClick={() => {
+                      setReciter(r.id)
+                      setSheetOpen(false)
+                    }}
                   >
                     <span>{lang === 'ru' ? r.nameRu : r.nameEn}</span>
                     {selected && (
@@ -407,19 +383,6 @@ export function QuranPlayerBar() {
                 )
               })}
             </div>
-
-            {error && (
-              <p className="quran-player__error quran-player-sheet__error">
-                {error === 'play-failed'
-                  ? t('Нажмите Play ещё раз', 'Tap Play again')
-                  : t('Не удалось загрузить аудио', 'Could not load audio')}
-                {error !== 'play-failed' && (
-                  <button type="button" onClick={retry}>
-                    {t('Повторить', 'Retry')}
-                  </button>
-                )}
-              </p>
-            )}
           </div>
         </div>
       )}

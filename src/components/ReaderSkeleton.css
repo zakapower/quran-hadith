@@ -81,6 +81,19 @@
   margin: 2rem 0 0;
 }
 
+.reader-skel--surah .reader-skel__nav {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.75rem;
+}
+
+.reader-skel__nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
 .reader-skel__nav-btn {
   width: 2.5rem;
   height: 2.5rem;
@@ -90,12 +103,19 @@
 }
 
 .reader-skel__nav-meta {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.45rem;
-  border: 1px solid var(--line);
+  width: min(9.5rem, 42%);
+  height: 0.9rem;
+  border-radius: 0.35rem;
   opacity: 0.88;
-  flex-shrink: 0;
+}
+
+.reader-skel--surah .reader-skel__nav > .reader-skel__nav-meta {
+  margin: 0 auto;
+}
+
+.reader-skel__nav-spacer {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Как у .ayah */

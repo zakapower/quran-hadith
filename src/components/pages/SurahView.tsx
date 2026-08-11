@@ -27,59 +27,84 @@ function SurahNav({
   const activeHere = audio.visible && audio.surah === n
   const showPause = activeHere && audio.playing
 
+  const prev =
+    n > 1 ? (
+      <Link
+        className="reader__nav-btn"
+        href={`/quran/${n - 1}`}
+        aria-label={t('Предыдущая сура', 'Previous surah')}
+        title={t('Предыдущая сура', 'Previous surah')}
+      >
+        <ChevronLeft strokeWidth={2.25} aria-hidden="true" />
+      </Link>
+    ) : (
+      <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
+    )
+
+  const next =
+    n < 114 ? (
+      <Link
+        className="reader__nav-btn"
+        href={`/quran/${n + 1}`}
+        aria-label={t('Следующая сура', 'Next surah')}
+        title={t('Следующая сура', 'Next surah')}
+      >
+        <ChevronRight strokeWidth={2.25} aria-hidden="true" />
+      </Link>
+    ) : (
+      <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
+    )
+
+  if (!top) {
+    return (
+      <nav className="reader__nav" aria-label={t('Суры', 'Surahs')}>
+        {prev}
+        <span className="reader__nav-spacer" aria-hidden="true" />
+        {next}
+      </nav>
+    )
+  }
+
   return (
     <nav
-      className={`reader__nav${top ? ' reader__nav--top' : ''}`}
+      className="reader__nav reader__nav--with-play reader__nav--top"
       aria-label={t('Суры', 'Surahs')}
     >
-      {n > 1 ? (
-        <Link
-          className="reader__nav-btn"
-          href={`/quran/${n - 1}`}
-          aria-label={t('Предыдущая сура', 'Previous surah')}
-          title={t('Предыдущая сура', 'Previous surah')}
+      <p className="reader__nav-meta">
+        {t(`Сура ${n} из 114`, `Surah ${n} of 114`)}
+      </p>
+      <div className="reader__nav-row">
+        {prev}
+        <button
+          type="button"
+          className="reader__nav-btn reader__nav-btn--play"
+          onClick={() => {
+            if (audio.visible && audio.surah === n && audio.playing) {
+              audio.pause()
+              return
+            }
+            // Main surah play always restarts from ayah 1.
+            audio.openAndPlay({ surah: n, ayah: 1 })
+          }}
+          aria-label={
+            showPause
+              ? t('Пауза', 'Pause')
+              : t('Слушать суру', 'Play surah')
+          }
+          title={
+            showPause
+              ? t('Пауза', 'Pause')
+              : t('Слушать суру', 'Play surah')
+          }
         >
-          <ChevronLeft strokeWidth={2.25} aria-hidden="true" />
-        </Link>
-      ) : (
-        <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
-      )}
-      <button
-        type="button"
-        className="reader__nav-btn reader__nav-btn--play"
-        onClick={() => {
-          if (activeHere) audio.togglePause()
-          else audio.openAndPlay({ surah: n })
-        }}
-        aria-label={
-          showPause
-            ? t('Пауза', 'Pause')
-            : t('Слушать суру', 'Play surah')
-        }
-        title={
-          showPause
-            ? t('Пауза', 'Pause')
-            : t('Слушать суру', 'Play surah')
-        }
-      >
-        {showPause ? (
-          <Pause strokeWidth={2.25} aria-hidden="true" />
-        ) : (
-          <Play strokeWidth={2.25} aria-hidden="true" />
-        )}
-      </button>
-      {n < 114 ? (
-        <Link
-          className="reader__nav-btn"
-          href={`/quran/${n + 1}`}
-          aria-label={t('Следующая сура', 'Next surah')}
-          title={t('Следующая сура', 'Next surah')}
-        >
-          <ChevronRight strokeWidth={2.25} aria-hidden="true" />
-        </Link>
-      ) : (
-        <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
-      )}
+          {showPause ? (
+            <Pause strokeWidth={2.25} aria-hidden="true" />
+          ) : (
+            <Play strokeWidth={2.25} aria-hidden="true" />
+          )}
+        </button>
+        {next}
+      </div>
     </nav>
   )
 }
@@ -195,11 +220,13 @@ export function SurahView() {
                 audio.visible &&
                 audio.surah === surah.number &&
                 audio.ayah === a.numberInSurah
+              const ayahLive = playing && audio.playing
               const words = audio.wordsByAyah?.get(a.numberInSurah)
               const cls = [
                 'ayah',
                 hit ? 'ayah--hit' : '',
                 playing ? 'ayah--playing' : '',
+                ayahLive ? 'ayah--live' : '',
               ]
                 .filter(Boolean)
                 .join(' ')
@@ -215,20 +242,38 @@ export function SurahView() {
                     <div className="ayah__actions">
                       <button
                         type="button"
-                        className="ayah__play"
-                        onClick={() =>
+                        className={`ayah__play${
+                          playing ? ' ayah__play--on' : ''
+                        }${ayahLive ? ' ayah__play--live' : ''}`}
+                        onClick={() => {
+                          if (playing) {
+                            audio.togglePause()
+                            return
+                          }
                           audio.openAndPlay({
                             surah: surah.number,
                             ayah: a.numberInSurah,
                           })
+                        }}
+                        aria-label={
+                          ayahLive
+                            ? t('Пауза', 'Pause')
+                            : t(
+                                `Слушать аят ${a.numberInSurah}`,
+                                `Play ayah ${a.numberInSurah}`,
+                              )
                         }
-                        aria-label={t(
-                          `Слушать аят ${a.numberInSurah}`,
-                          `Play ayah ${a.numberInSurah}`,
-                        )}
-                        title={t('Слушать', 'Play')}
+                        title={
+                          ayahLive
+                            ? t('Пауза', 'Pause')
+                            : t('Слушать', 'Play')
+                        }
                       >
-                        <Play strokeWidth={2} aria-hidden="true" />
+                        {ayahLive ? (
+                          <Pause strokeWidth={2} aria-hidden="true" />
+                        ) : (
+                          <Play strokeWidth={2} aria-hidden="true" />
+                        )}
                       </button>
                       <CopyAyahButton
                         surah={surah.number}

@@ -16,6 +16,7 @@ export type Theme = 'light' | 'dark'
 
 const FONT_AR_KEY = 'qh-font-ar'
 const FONT_TR_KEY = 'qh-font-tr'
+const REDUCE_MOTION_KEY = 'qh-reduce-motion'
 export const FONT_SCALE_MIN = 0.7
 export const FONT_SCALE_MAX = 1.4
 export const FONT_SCALE_STEP = 0.05
@@ -26,9 +27,11 @@ interface AppState {
   theme: Theme
   fontAr: number
   fontTr: number
+  reduceMotion: boolean
   setLang: (lang: Lang) => void
   setFontAr: (n: number) => void
   setFontTr: (n: number) => void
+  setReduceMotion: (on: boolean) => void
   resetFonts: () => void
   toggleLang: () => void
   toggleTheme: () => void
@@ -57,6 +60,20 @@ function readStoredScale(key: string): number {
   } catch {
     return FONT_SCALE_DEFAULT
   }
+}
+
+function readStoredReduceMotion(): boolean {
+  try {
+    return localStorage.getItem(REDUCE_MOTION_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function applyReduceMotionAttr(on: boolean) {
+  const root = document.documentElement
+  if (on) root.setAttribute('data-reduce-motion', '1')
+  else root.removeAttribute('data-reduce-motion')
 }
 
 function clampScale(n: number) {
@@ -104,12 +121,14 @@ export function AppProvider({
   const [themeReady, setThemeReady] = useState(false)
   const [fontAr, setFontArState] = useState(FONT_SCALE_DEFAULT)
   const [fontTr, setFontTrState] = useState(FONT_SCALE_DEFAULT)
+  const [reduceMotion, setReduceMotionState] = useState(false)
 
   useEffect(() => {
     setTheme(readStoredTheme())
     setThemeReady(true)
     setFontArState(readStoredScale(FONT_AR_KEY))
     setFontTrState(readStoredScale(FONT_TR_KEY))
+    setReduceMotionState(readStoredReduceMotion())
   }, [])
 
   useEffect(() => {
@@ -144,12 +163,22 @@ export function AppProvider({
     }
   }, [fontAr, fontTr])
 
+  useEffect(() => {
+    applyReduceMotionAttr(reduceMotion)
+    try {
+      localStorage.setItem(REDUCE_MOTION_KEY, reduceMotion ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }, [reduceMotion])
+
   const value = useMemo<AppState>(
     () => ({
       lang,
       theme,
       fontAr,
       fontTr,
+      reduceMotion,
       setLang: (next) => {
         writeLangCookie(next)
         setLangState(next)
@@ -157,6 +186,7 @@ export function AppProvider({
       },
       setFontAr: (n) => setFontArState(clampScale(n)),
       setFontTr: (n) => setFontTrState(clampScale(n)),
+      setReduceMotion: setReduceMotionState,
       resetFonts: () => {
         setFontArState(FONT_SCALE_DEFAULT)
         setFontTrState(FONT_SCALE_DEFAULT)
@@ -170,7 +200,7 @@ export function AppProvider({
       toggleTheme: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')),
       t: (ru, en) => (lang === 'ru' ? ru : en),
     }),
-    [lang, theme, fontAr, fontTr, router],
+    [lang, theme, fontAr, fontTr, reduceMotion, router],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

@@ -1,6 +1,6 @@
 :root {
-  --font: 'IBM Plex Sans', 'Segoe UI', sans-serif;
-  --font-display: 'Literata', Georgia, serif;
+  --font: var(--font-sans), 'Segoe UI', sans-serif;
+  --font-display: var(--font-display-face), Georgia, serif;
   --font-arabic: 'UthmanicHafs', 'KFGQPC Uthmanic Script HAFS', serif;
   --max: 45rem;
   --reader-ar-scale: 1;
@@ -136,6 +136,7 @@ input:focus-visible {
   .ctrl:hover,
   .ayah__copy:hover,
   .ayah--hit .ayah__copy:hover,
+  .ayah--playing .ayah__copy:hover,
   .reader__nav-btn:hover,
   .card-list li a:hover,
   .settings__reset:hover:not(:disabled) {
@@ -159,7 +160,8 @@ input:focus-visible {
     border-color: var(--line);
   }
 
-  .ayah--hit .ayah__copy:hover {
+  .ayah--hit .ayah__copy:hover,
+  .ayah--playing .ayah__copy:hover {
     border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
     background: color-mix(in srgb, var(--accent) 10%, var(--surface));
     color: var(--muted);
@@ -177,8 +179,10 @@ html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
 html[data-touch='1'] .ayah__play:hover,
 html[data-touch='1'] .ayah--hit .ayah__copy:hover,
+html[data-touch='1'] .ayah--playing .ayah__copy:hover,
 html[data-touch='1'] .reader__nav-btn:hover,
 html[data-touch='1'] .quran-player__btn:hover,
+html[data-touch='1'] .quran-player__reciter-btn:hover,
 html[data-touch='1'] .card-list li a:hover,
 html[data-touch='1'] .settings__reset:hover:not(:disabled) {
   transform: none !important;
@@ -201,7 +205,8 @@ html[data-touch='1'] .btn--ghost:hover {
   border-color: var(--line) !important;
 }
 
-html[data-touch='1'] .ayah--hit .ayah__copy:hover {
+html[data-touch='1'] .ayah--hit .ayah__copy:hover,
+html[data-touch='1'] .ayah--playing .ayah__copy:hover {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--line)) !important;
   background: color-mix(in srgb, var(--accent) 10%, var(--surface)) !important;
   color: var(--muted) !important;
@@ -216,6 +221,31 @@ html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
 html[data-touch='1'] .ayah__play:hover,
 html[data-touch='1'] .reader__nav-btn:hover,
-html[data-touch='1'] .quran-player__btn:hover {
+html[data-touch='1'] .quran-player__btn:hover,
+html[data-touch='1'] .quran-player__reciter-btn:hover {
   color: var(--muted) !important;
+}
+
+html[data-touch='1'] .quran-player__reciter-btn:hover {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+}
+
+/* User toggle or OS preference: CSS motion only */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-reduce-motion='1'] *,
+html[data-reduce-motion='1'] *::before,
+html[data-reduce-motion='1'] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
 }

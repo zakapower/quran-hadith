@@ -1,14 +1,16 @@
+import { getSurahMeta } from '@/data/surahList'
+import { getReciter, localAyahAudioPath } from '@/data/reciters'
 import {
   normalizeSegments,
   parseVerseKeyAyah,
   type AyahTiming,
+  type WordSegment,
 } from '@/utils/audioSegments'
 
 const API = 'https://api.quran.com/api/v4'
 
 type RawChapterRecitation = {
   audio_file: {
-    audio_url: string
     timestamps: Array<{
       verse_key: string
       timestamp_from: number
@@ -18,44 +20,101 @@ type RawChapterRecitation = {
   }
 }
 
-export type ChapterRecitation = {
-  audioUrl: string
+export type ChapterAudioPack = {
+  /** Timings relative to the start of each ayah MP3 (may have empty segments). */
   timestamps: AyahTiming[]
+  audioByAyah: Map<number, string>
 }
 
-const recitationCache = new Map<string, ChapterRecitation>()
+const packCache = new Map<string, ChapterAudioPack>()
 const wordsCache = new Map<number, Map<number, string[]>>()
 
-function recitationKey(reciterId: number, chapter: number) {
+function packKey(reciterId: number, chapter: number) {
   return `${reciterId}:${chapter}`
 }
 
-export async function fetchChapterRecitation(
+function relativizeSegments(
+  segments: WordSegment[],
+  baseMs: number,
+): WordSegment[] {
+  return segments.map((s) => ({
+    wordIndex: s.wordIndex,
+    startMs: Math.max(0, s.startMs - baseMs),
+    endMs: Math.max(0, s.endMs - baseMs),
+  }))
+}
+
+function buildAudioMap(reciterId: number, chapter: number, count: number) {
+  const map = new Map<number, string>()
+  // Ensure reciter exists
+  getReciter(reciterId)
+  for (let ayah = 1; ayah <= count; ayah++) {
+    map.set(ayah, localAyahAudioPath(reciterId, chapter, ayah))
+  }
+  return map
+}
+
+function fallbackTimestamps(chapter: number, count: number): AyahTiming[] {
+  return Array.from({ length: count }, (_, i) => {
+    const ayah = i + 1
+    return {
+      verseKey: `${chapter}:${ayah}`,
+      ayah,
+      fromMs: 0,
+      toMs: 0,
+      segments: [],
+    }
+  })
+}
+
+async function fetchRelativeTimings(
   reciterId: number,
   chapter: number,
-): Promise<ChapterRecitation> {
-  const key = recitationKey(reciterId, chapter)
-  const hit = recitationCache.get(key)
+): Promise<AyahTiming[] | null> {
+  try {
+    const res = await fetch(
+      `${API}/chapter_recitations/${reciterId}/${chapter}?segments=true`,
+    )
+    if (!res.ok) return null
+    const data = (await res.json()) as RawChapterRecitation
+    const rows = data.audio_file?.timestamps
+    if (!rows?.length) return null
+
+    return rows.map((row) => {
+      const fromMs = Number(row.timestamp_from) || 0
+      const toMs = Number(row.timestamp_to) || 0
+      const absolute = normalizeSegments(row.segments ?? [])
+      return {
+        verseKey: row.verse_key,
+        ayah: parseVerseKeyAyah(row.verse_key),
+        fromMs: 0,
+        toMs: Math.max(0, toMs - fromMs),
+        segments: relativizeSegments(absolute, fromMs),
+      }
+    })
+  } catch {
+    return null
+  }
+}
+
+export async function fetchChapterAudioPack(
+  reciterId: number,
+  chapter: number,
+): Promise<ChapterAudioPack> {
+  const key = packKey(reciterId, chapter)
+  const hit = packCache.get(key)
   if (hit) return hit
 
-  const res = await fetch(
-    `${API}/chapter_recitations/${reciterId}/${chapter}?segments=true`,
-  )
-  if (!res.ok) throw new Error(`recitation ${reciterId}/${chapter} failed`)
-  const data = (await res.json()) as RawChapterRecitation
-  const file = data.audio_file
-  if (!file?.audio_url) throw new Error('missing audio_url')
+  const meta = getSurahMeta(chapter)
+  if (!meta) throw new Error('surah not found')
+  const count = meta.numberOfAyahs
+  const audioByAyah = buildAudioMap(reciterId, chapter, count)
+  const timestamps =
+    (await fetchRelativeTimings(reciterId, chapter)) ??
+    fallbackTimestamps(chapter, count)
 
-  const timestamps: AyahTiming[] = (file.timestamps ?? []).map((row) => ({
-    verseKey: row.verse_key,
-    ayah: parseVerseKeyAyah(row.verse_key),
-    fromMs: Number(row.timestamp_from) || 0,
-    toMs: Number(row.timestamp_to) || 0,
-    segments: normalizeSegments(row.segments ?? []),
-  }))
-
-  const out = { audioUrl: file.audio_url, timestamps }
-  recitationCache.set(key, out)
+  const out = { timestamps, audioByAyah }
+  packCache.set(key, out)
   return out
 }
 
