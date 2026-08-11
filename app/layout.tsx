@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { AppProvider } from '@/context/AppContext'
+import { QuranAudioProvider } from '@/context/QuranAudioContext'
 import { Header } from '@/components/Header'
 import { OverlayScrollbar } from '@/components/OverlayScrollbar'
+import { QuranPlayerBar } from '@/components/QuranPlayerBar'
 import { ScrollToTop } from '@/components/ScrollToTop'
 import { getRequestLang } from '@/lib/request-lang'
 import { getSiteOrigin } from '@/lib/site'
@@ -51,19 +53,22 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body>
         <AppProvider initialLang={lang}>
-          <ScrollToTop />
-          <OverlayScrollbar />
-          <div className="app-shell">
-            <Header />
-            <main>{children}</main>
-            <footer className="site-footer">
-              <span className="site-footer__brand">Tilāwah</span>
-              <span className="site-footer__dot" aria-hidden="true">
-                ·
-              </span>
-              <span className="site-footer__arabic">تلاوة</span>
-            </footer>
-          </div>
+          <QuranAudioProvider>
+            <ScrollToTop />
+            <OverlayScrollbar />
+            <div className="app-shell">
+              <Header />
+              <main>{children}</main>
+              <footer className="site-footer">
+                <span className="site-footer__brand">Tilāwah</span>
+                <span className="site-footer__dot" aria-hidden="true">
+                  ·
+                </span>
+                <span className="site-footer__arabic">تلاوة</span>
+              </footer>
+            </div>
+            <QuranPlayerBar />
+          </QuranAudioProvider>
         </AppProvider>
       </body>
     </html>

@@ -5,6 +5,10 @@
   animation: in 0.45s ease both;
 }
 
+.reader--player-open {
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
 .reader__crumb {
   display: flex;
   flex-wrap: wrap;
@@ -67,6 +71,11 @@
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
+.ayah--playing {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
 .ayah--hit .ayah__copy {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
   /* Как у обычных: фон кнопки = фон карточки, иначе scale выглядит как скачок */
@@ -80,6 +89,45 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.55rem;
+}
+
+.ayah__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ayah__play {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.ayah__play svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: block;
+}
+
+.ayah__play:active {
+  transform: translateZ(0) scale(0.96);
+  box-shadow: none;
+  transition-duration: 0.1s;
 }
 
 .ayah__n {
@@ -120,6 +168,13 @@
 
 @media (hover: hover) and (pointer: fine) {
   .ayah__copy:hover {
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+    transform: translateZ(0) scale(1.03);
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+
+  .ayah__play:hover {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
     transform: translateZ(0) scale(1.03);
@@ -183,12 +238,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ayah__copy,
-  .ayah__copy-icon {
+  .ayah__copy-icon,
+  .ayah__play,
+  .ayah__word {
     transition: none;
   }
 
   .ayah__copy:hover,
-  .ayah__copy:active {
+  .ayah__copy:active,
+  .ayah__play:hover,
+  .ayah__play:active {
     transform: none;
     box-shadow: none;
   }
@@ -203,6 +262,20 @@
   line-height: 1.9;
   color: var(--ink);
   overflow-wrap: anywhere;
+}
+
+.ayah__word {
+  transition: color 0.12s ease, opacity 0.12s ease;
+}
+
+.ayah--playing .ayah__word {
+  opacity: 0.45;
+}
+
+.ayah--playing .ayah__word--active {
+  opacity: 1;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .ayah__tr {
@@ -238,6 +311,9 @@
   justify-content: center;
   text-decoration: none;
   flex-shrink: 0;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
   transition:
     color 0.22s ease,
     border-color 0.22s ease,
@@ -321,7 +397,8 @@
     scroll-margin-top: 8.5rem;
   }
 
-  .ayah__copy {
+  .ayah__copy,
+  .ayah__play {
     width: 2.75rem;
     height: 2.75rem;
   }

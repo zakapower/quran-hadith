@@ -90,10 +90,12 @@
 }
 
 .reader-skel__nav-meta {
-  width: min(9.5rem, 42%);
-  height: 0.9rem;
-  border-radius: 0.35rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.45rem;
+  border: 1px solid var(--line);
   opacity: 0.88;
+  flex-shrink: 0;
 }
 
 /* Как у .ayah */

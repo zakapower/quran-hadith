@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import { fetchSurah } from '@/api/quran'
 import type { SurahContent } from '@/data/types'
 import { surahTitleRu } from '@/data/surahNamesRu'
@@ -12,6 +12,7 @@ import { CopyAyahButton } from '@/components/CopyAyahButton'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
 import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
 import { useApp } from '@/context/AppContext'
+import { useQuranAudio } from '@/context/QuranAudioContext'
 import './Reader.css'
 
 function SurahNav({
@@ -22,6 +23,10 @@ function SurahNav({
   top?: boolean
 }) {
   const { t } = useApp()
+  const audio = useQuranAudio()
+  const activeHere = audio.visible && audio.surah === n
+  const showPause = activeHere && audio.playing
+
   return (
     <nav
       className={`reader__nav${top ? ' reader__nav--top' : ''}`}
@@ -39,9 +44,30 @@ function SurahNav({
       ) : (
         <span className="reader__nav-btn reader__nav-btn--ghost" aria-hidden="true" />
       )}
-      <p className="reader__nav-meta">
-        {t(`Сура ${n} из 114`, `Surah ${n} of 114`)}
-      </p>
+      <button
+        type="button"
+        className="reader__nav-btn reader__nav-btn--play"
+        onClick={() => {
+          if (activeHere) audio.togglePause()
+          else audio.openAndPlay({ surah: n })
+        }}
+        aria-label={
+          showPause
+            ? t('Пауза', 'Pause')
+            : t('Слушать суру', 'Play surah')
+        }
+        title={
+          showPause
+            ? t('Пауза', 'Pause')
+            : t('Слушать суру', 'Play surah')
+        }
+      >
+        {showPause ? (
+          <Pause strokeWidth={2.25} aria-hidden="true" />
+        ) : (
+          <Play strokeWidth={2.25} aria-hidden="true" />
+        )}
+      </button>
       {n < 114 ? (
         <Link
           className="reader__nav-btn"
@@ -62,6 +88,7 @@ export function SurahView() {
   const params = useParams<{ number: string }>()
   const searchParams = useSearchParams()
   const { lang, t } = useApp()
+  const audio = useQuranAudio()
   const [surah, setSurah] = useState<SurahContent | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -116,8 +143,10 @@ export function SurahView() {
 
   useReaderScrollMemory(readerPath, Boolean(surah), Boolean(highlight))
 
+  const playerOpen = audio.visible && audio.surah === n
+
   return (
-    <div className="reader">
+    <div className={`reader${playerOpen ? ' reader--player-open' : ''}`}>
       <nav className="reader__crumb">
         <Link href="/quran">{t('Коран', 'Qur’an')}</Link>
         <span aria-hidden="true">/</span>
@@ -162,22 +191,73 @@ export function SurahView() {
                 highlight &&
                 a.numberInSurah >= highlight.from &&
                 a.numberInSurah <= highlight.to
+              const playing =
+                audio.visible &&
+                audio.surah === surah.number &&
+                audio.ayah === a.numberInSurah
+              const words = audio.wordsByAyah?.get(a.numberInSurah)
+              const cls = [
+                'ayah',
+                hit ? 'ayah--hit' : '',
+                playing ? 'ayah--playing' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')
+
               return (
                 <article
                   key={a.number}
-                  className={hit ? 'ayah ayah--hit' : 'ayah'}
+                  className={cls}
                   id={`a${a.numberInSurah}`}
                 >
                   <div className="ayah__top">
                     <p className="ayah__n">{a.numberInSurah}</p>
-                    <CopyAyahButton
-                      surah={surah.number}
-                      ayah={a.numberInSurah}
-                      translation={surah.ayahsTranslation[i]?.text ?? ''}
-                    />
+                    <div className="ayah__actions">
+                      <button
+                        type="button"
+                        className="ayah__play"
+                        onClick={() =>
+                          audio.openAndPlay({
+                            surah: surah.number,
+                            ayah: a.numberInSurah,
+                          })
+                        }
+                        aria-label={t(
+                          `Слушать аят ${a.numberInSurah}`,
+                          `Play ayah ${a.numberInSurah}`,
+                        )}
+                        title={t('Слушать', 'Play')}
+                      >
+                        <Play strokeWidth={2} aria-hidden="true" />
+                      </button>
+                      <CopyAyahButton
+                        surah={surah.number}
+                        ayah={a.numberInSurah}
+                        translation={surah.ayahsTranslation[i]?.text ?? ''}
+                      />
+                    </div>
                   </div>
                   <p className="ayah__ar" dir="rtl" lang="ar">
-                    {a.text}
+                    {playing && words && words.length > 0
+                      ? words.map((w, wi) => {
+                          const idx = wi + 1
+                          const active = audio.activeWordIndex === idx
+                          return (
+                            <span key={`${a.numberInSurah}-${idx}`}>
+                              {wi > 0 ? ' ' : null}
+                              <span
+                                className={
+                                  active
+                                    ? 'ayah__word ayah__word--active'
+                                    : 'ayah__word'
+                                }
+                              >
+                                {w}
+                              </span>
+                            </span>
+                          )
+                        })
+                      : a.text}
                   </p>
                   <p className="ayah__tr">{surah.ayahsTranslation[i]?.text}</p>
                 </article>

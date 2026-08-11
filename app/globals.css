@@ -175,8 +175,10 @@ html[data-touch='1'] .btn:hover,
 html[data-touch='1'] .btn--ghost:hover,
 html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
+html[data-touch='1'] .ayah__play:hover,
 html[data-touch='1'] .ayah--hit .ayah__copy:hover,
 html[data-touch='1'] .reader__nav-btn:hover,
+html[data-touch='1'] .quran-player__btn:hover,
 html[data-touch='1'] .card-list li a:hover,
 html[data-touch='1'] .settings__reset:hover:not(:disabled) {
   transform: none !important;
@@ -212,6 +214,8 @@ html[data-touch='1'] .settings__reset:hover:not(:disabled) {
 
 html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
-html[data-touch='1'] .reader__nav-btn:hover {
+html[data-touch='1'] .ayah__play:hover,
+html[data-touch='1'] .reader__nav-btn:hover,
+html[data-touch='1'] .quran-player__btn:hover {
   color: var(--muted) !important;
 }
