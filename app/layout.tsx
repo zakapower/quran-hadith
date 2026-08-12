@@ -28,6 +28,12 @@ const literata = Literata({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
+  applicationName: 'Tilāwah',
+  appleWebApp: {
+    capable: true,
+    title: 'Tilāwah',
+    statusBarStyle: 'black-translucent',
+  },
   // Managed at runtime (theme); keep Next from injecting a fixed icon.
   icons: {},
 }
