@@ -18,6 +18,7 @@ import {
 import { DEFAULT_RECITER_ID, getReciter } from '@/data/reciters'
 import {
   findActiveWordIndex,
+  findAyahIndexByTime,
   type AyahTiming,
 } from '@/utils/audioSegments'
 import {
@@ -104,11 +105,11 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const timestampsRef = useRef<AyahTiming[]>([])
-  const audioByAyahRef = useRef<Map<number, string>>(new Map())
+  const audioUrlRef = useRef<string>('')
   const targetRef = useRef<PlayTarget | null>(null)
   const loadGenRef = useRef(0)
-  const advancingRef = useRef(false)
   const ignoreErrorRef = useRef(false)
+  const finishingRef = useRef(false)
 
   const [visible, setVisible] = useState(false)
   const [playing, setPlaying] = useState(false)
@@ -173,15 +174,27 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', onKey, { capture: true })
   }, [visible, pause])
 
-  const playAyahFile = useCallback(async (ayahNumber: number, autoplay: boolean) => {
+  const finishSurah = useCallback(() => {
+    if (finishingRef.current) return
+    finishingRef.current = true
+    const audio = audioRef.current
+    if (audio && !audio.paused) audio.pause()
+    setPlaying(false)
+    setProgress(1)
+    setActiveWordIndex(null)
+    window.setTimeout(() => {
+      finishingRef.current = false
+    }, 200)
+  }, [])
+
+  const playAyah = useCallback(async (ayahNumber: number, autoplay: boolean) => {
     const audio = audioRef.current
     const timestamps = timestampsRef.current
-    if (!audio || timestamps.length === 0) return
+    const url = audioUrlRef.current
+    if (!audio || !url || timestamps.length === 0) return
 
     const clamped = clampAyah(ayahNumber, timestamps)
     const row = timestamps.find((t) => t.ayah === clamped) ?? timestamps[0]
-    const url = audioByAyahRef.current.get(row.ayah)
-    if (!url) throw new Error('missing-ayah-url')
 
     const surahNum = targetRef.current?.surah
     if (surahNum != null) {
@@ -191,6 +204,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     setAyah(row.ayah)
     setActiveWordIndex(null)
     setProgress(0)
+    finishingRef.current = false
 
     requestAnimationFrame(() => {
       document
@@ -202,34 +216,22 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     try {
       const needsLoad = !sameAudioUrl(audio.src, url)
       if (needsLoad) {
-        audio.src = url
+        await loadAudioSrc(audio, url)
       }
 
-      const seekStart = () => {
-        try {
-          if (audio.readyState >= 1) audio.currentTime = 0
-        } catch {
-          /* ignore */
-        }
+      try {
+        audio.currentTime = row.fromMs / 1000
+      } catch {
+        /* ignore */
       }
 
       if (autoplay) {
-        seekStart()
-        // Call play() ASAP so sequential advance from `ended` keeps user-gesture chain.
         await audio.play()
         setPlaying(true)
         setError(null)
-        const rowNow = timestampsRef.current.find((t) => t.ayah === row.ayah)
-        if (rowNow) {
-          setActiveWordIndex(
-            findActiveWordIndex(rowNow.segments, audio.currentTime * 1000),
-          )
-        }
-      } else if (needsLoad) {
-        await loadAudioSrc(audio, url)
-        seekStart()
-      } else {
-        seekStart()
+        setActiveWordIndex(
+          findActiveWordIndex(row.segments, audio.currentTime * 1000),
+        )
       }
     } catch {
       setPlaying(false)
@@ -255,9 +257,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         if (gen !== loadGenRef.current) return
 
         timestampsRef.current = pack.timestamps
-        audioByAyahRef.current = pack.audioByAyah
+        audioUrlRef.current = pack.audioUrl
 
-        // Words are optional (karaoke); don't block playback.
         void fetchChapterWords(opts.surah)
           .then((words) => {
             if (gen === loadGenRef.current) setWordsByAyah(words)
@@ -266,7 +267,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
             /* ignore */
           })
 
-        await playAyahFile(opts.ayah, true)
+        await playAyah(opts.ayah, true)
       } catch {
         if (gen !== loadGenRef.current) return
         setPlaying(false)
@@ -275,7 +276,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         if (gen === loadGenRef.current) setLoading(false)
       }
     },
-    [playAyahFile],
+    [playAyah],
   )
 
   const openAndPlay = useCallback(
@@ -286,16 +287,14 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         (surah === opts.surah && ayah != null ? ayah : null) ??
         1
 
-      // Already have this surah loaded — jump without full reload.
       if (
         surah === opts.surah &&
         timestampsRef.current.length > 0 &&
-        audioByAyahRef.current.size > 0
+        audioUrlRef.current
       ) {
         setVisible(true)
         setError(null)
-        // Explicit ayah (e.g. surah Play → 1, or ayah button) always restarts that file.
-        void playAyahFile(start, true)
+        void playAyah(start, true)
         return
       }
 
@@ -305,7 +304,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         reciter: reciterId,
       })
     },
-    [ayah, loadAndPlay, playAyahFile, reciterId, surah],
+    [ayah, loadAndPlay, playAyah, reciterId, surah],
   )
 
   const retry = useCallback(() => {
@@ -339,16 +338,16 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     if (!ayah || timestamps.length === 0) return
     const idx = timestamps.findIndex((t) => t.ayah === ayah)
     if (idx < 0 || idx >= timestamps.length - 1) return
-    void playAyahFile(timestamps[idx + 1].ayah, true)
-  }, [ayah, playAyahFile])
+    void playAyah(timestamps[idx + 1].ayah, true)
+  }, [ayah, playAyah])
 
   const prevAyah = useCallback(() => {
     const timestamps = timestampsRef.current
     if (!ayah || timestamps.length === 0) return
     const idx = timestamps.findIndex((t) => t.ayah === ayah)
     if (idx <= 0) return
-    void playAyahFile(timestamps[idx - 1].ayah, true)
-  }, [ayah, playAyahFile])
+    void playAyah(timestamps[idx - 1].ayah, true)
+  }, [ayah, playAyah])
 
   const setReciter = useCallback(
     (id: number) => {
@@ -363,47 +362,44 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     [loadAndPlay, visible],
   )
 
-  const advanceOrStop = useCallback(() => {
-    if (advancingRef.current) return
-    const timestamps = timestampsRef.current
-    const current = targetRef.current?.ayah
-    if (!current || timestamps.length === 0) return
-    const idx = timestamps.findIndex((t) => t.ayah === current)
-    const last = timestamps[timestamps.length - 1]
-    if (idx < 0 || current === last.ayah || idx >= timestamps.length - 1) {
-      setPlaying(false)
-      setProgress(1)
-      setActiveWordIndex(null)
-      return
-    }
-    advancingRef.current = true
-    void playAyahFile(timestamps[idx + 1].ayah, true).finally(() => {
-      advancingRef.current = false
-    })
-  }, [playAyahFile])
-
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
 
     const syncFromClock = () => {
       const timestamps = timestampsRef.current
-      const currentAyah = targetRef.current?.ayah
-      if (!currentAyah || timestamps.length === 0) return
-      const row = timestamps.find((t) => t.ayah === currentAyah)
-      if (!row) return
+      if (timestamps.length === 0) return
 
       const tMs = audio.currentTime * 1000
+      const idx = findAyahIndexByTime(timestamps, tMs)
+      const row = timestamps[idx]
+      if (!row) return
+
+      const prevAyah = targetRef.current?.ayah
+      if (prevAyah !== row.ayah) {
+        const surahNum = targetRef.current?.surah
+        if (surahNum != null) {
+          targetRef.current = { surah: surahNum, ayah: row.ayah }
+          writeLastAyah(surahNum, row.ayah)
+        }
+        setAyah(row.ayah)
+        requestAnimationFrame(() => {
+          document
+            .getElementById(`a${row.ayah}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
+      }
+
       setActiveWordIndex(findActiveWordIndex(row.segments, tMs))
 
-      // Progress from real file duration — chapter toMs can disagree with everyayah mp3.
-      const fileMs =
-        Number.isFinite(audio.duration) && audio.duration > 0
-          ? audio.duration * 1000
-          : 0
-      const durMs = fileMs > 0 ? fileMs : row.toMs > 0 ? row.toMs : 0
-      if (durMs > 0) {
-        setProgress(Math.min(1, Math.max(0, tMs / durMs)))
+      const span = row.toMs - row.fromMs
+      if (span > 0) {
+        setProgress(Math.min(1, Math.max(0, (tMs - row.fromMs) / span)))
+      }
+
+      const last = timestamps[timestamps.length - 1]
+      if (tMs >= last.toMs - 40 && !audio.paused) {
+        finishSurah()
       }
     }
 
@@ -423,10 +419,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       cancelAnimationFrame(raf)
       syncFromClock()
     }
-    // Advance only when the ayah file truly ends — don't pause mid-file
-    // (that breaks the autoplay chain for the next ayah).
     const onEnded = () => {
-      advanceOrStop()
+      finishSurah()
     }
     const onError = () => {
       if (ignoreErrorRef.current) return
@@ -449,7 +443,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('ended', onEnded)
       audio.removeEventListener('error', onError)
     }
-  }, [advanceOrStop])
+  }, [finishSurah])
 
   const value = useMemo<QuranAudioApi>(
     () => ({

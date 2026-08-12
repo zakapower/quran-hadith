@@ -1,17 +1,18 @@
 import { getSurahMeta } from '@/data/surahList'
-import { getReciter, localAyahAudioPath } from '@/data/reciters'
+import { getReciter, localChapterAudioPath } from '@/data/reciters'
 import {
   normalizeSegments,
   parseVerseKeyAyah,
   type AyahTiming,
-  type WordSegment,
 } from '@/utils/audioSegments'
 import { cacheGet, cacheSet } from '@/utils/pageCache'
 
 const API = 'https://api.quran.com/api/v4'
+const PACK_NS = 'audio-pack-v2'
 
 type RawChapterRecitation = {
   audio_file: {
+    audio_url?: string
     timestamps: Array<{
       verse_key: string
       timestamp_from: number
@@ -22,100 +23,69 @@ type RawChapterRecitation = {
 }
 
 export type ChapterAudioPack = {
-  /** Timings relative to the start of each ayah MP3 (may have empty segments). */
+  /** Same-origin proxy URL for the full-surah MP3. */
+  audioUrl: string
   timestamps: AyahTiming[]
-  audioByAyah: Map<number, string>
 }
 
 const packCache = new Map<string, ChapterAudioPack>()
 const wordsCache = new Map<number, Map<number, string[]>>()
+const upstreamUrlCache = new Map<string, string>()
 
 function packKey(reciterId: number, chapter: number) {
   return `${reciterId}:${chapter}`
 }
 
-function relativizeSegments(
-  segments: WordSegment[],
-  baseMs: number,
-): WordSegment[] {
-  return segments.map((s) => ({
-    wordIndex: s.wordIndex,
-    startMs: Math.max(0, s.startMs - baseMs),
-    endMs: Math.max(0, s.endMs - baseMs),
-  }))
-}
-
-function buildAudioMap(reciterId: number, chapter: number, count: number) {
-  const map = new Map<number, string>()
-  // Ensure reciter exists
+async function fetchChapterRecitation(
+  reciterId: number,
+  chapter: number,
+): Promise<RawChapterRecitation['audio_file']> {
   getReciter(reciterId)
-  for (let ayah = 1; ayah <= count; ayah++) {
-    map.set(ayah, localAyahAudioPath(reciterId, chapter, ayah))
+  const res = await fetch(
+    `${API}/chapter_recitations/${reciterId}/${chapter}?segments=true`,
+    { cache: 'force-cache' },
+  )
+  if (!res.ok) throw new Error(`chapter_recitations ${reciterId}/${chapter}`)
+  const data = (await res.json()) as RawChapterRecitation
+  const file = data.audio_file
+  if (!file?.audio_url || !file.timestamps?.length) {
+    throw new Error('missing audio_url or timestamps')
   }
-  return map
+  return file
 }
 
-function fallbackTimestamps(chapter: number, count: number): AyahTiming[] {
-  return Array.from({ length: count }, (_, i) => {
-    const ayah = i + 1
+function mapAbsoluteTimestamps(
+  rows: RawChapterRecitation['audio_file']['timestamps'],
+): AyahTiming[] {
+  return rows.map((row) => {
+    const fromMs = Number(row.timestamp_from) || 0
+    const toMs = Number(row.timestamp_to) || 0
     return {
-      verseKey: `${chapter}:${ayah}`,
-      ayah,
-      fromMs: 0,
-      toMs: 0,
-      segments: [],
+      verseKey: row.verse_key,
+      ayah: parseVerseKeyAyah(row.verse_key),
+      fromMs,
+      toMs,
+      segments: normalizeSegments(row.segments ?? []),
     }
   })
 }
 
-async function fetchRelativeTimings(
+/** Server-side: upstream quranicaudio URL for proxying. */
+export async function resolveChapterAudioUrl(
   reciterId: number,
   chapter: number,
-): Promise<AyahTiming[] | null> {
-  try {
-    const res = await fetch(
-      `${API}/chapter_recitations/${reciterId}/${chapter}?segments=true`,
-      { cache: 'force-cache' },
-    )
-    if (!res.ok) return null
-    const data = (await res.json()) as RawChapterRecitation
-    const rows = data.audio_file?.timestamps
-    if (!rows?.length) return null
-
-    return rows.map((row) => {
-      const fromMs = Number(row.timestamp_from) || 0
-      const toMs = Number(row.timestamp_to) || 0
-      const absolute = normalizeSegments(row.segments ?? [])
-      return {
-        verseKey: row.verse_key,
-        ayah: parseVerseKeyAyah(row.verse_key),
-        fromMs: 0,
-        toMs: Math.max(0, toMs - fromMs),
-        segments: relativizeSegments(absolute, fromMs),
-      }
-    })
-  } catch {
-    return null
-  }
+): Promise<string> {
+  const key = packKey(reciterId, chapter)
+  const hit = upstreamUrlCache.get(key)
+  if (hit) return hit
+  const file = await fetchChapterRecitation(reciterId, chapter)
+  upstreamUrlCache.set(key, file.audio_url!)
+  return file.audio_url!
 }
 
 type StoredPack = {
+  audioUrl: string
   timestamps: AyahTiming[]
-  audioByAyah: Record<string, string>
-}
-
-function packFromStore(raw: StoredPack): ChapterAudioPack {
-  const audioByAyah = new Map<number, string>()
-  for (const [k, v] of Object.entries(raw.audioByAyah)) {
-    audioByAyah.set(Number(k), v)
-  }
-  return { timestamps: raw.timestamps, audioByAyah }
-}
-
-function packToStore(pack: ChapterAudioPack): StoredPack {
-  const audioByAyah: Record<string, string> = {}
-  for (const [k, v] of pack.audioByAyah) audioByAyah[String(k)] = v
-  return { timestamps: pack.timestamps, audioByAyah }
 }
 
 export async function fetchChapterAudioPack(
@@ -126,24 +96,23 @@ export async function fetchChapterAudioPack(
   const hit = packCache.get(key)
   if (hit) return hit
 
-  const stored = cacheGet<StoredPack>('audio-pack', key)
-  if (stored?.timestamps?.length) {
-    const pack = packFromStore(stored)
-    packCache.set(key, pack)
-    return pack
+  const stored = cacheGet<StoredPack>(PACK_NS, key)
+  if (stored?.audioUrl && stored.timestamps?.length) {
+    packCache.set(key, stored)
+    return stored
   }
 
   const meta = getSurahMeta(chapter)
   if (!meta) throw new Error('surah not found')
-  const count = meta.numberOfAyahs
-  const audioByAyah = buildAudioMap(reciterId, chapter, count)
-  const timestamps =
-    (await fetchRelativeTimings(reciterId, chapter)) ??
-    fallbackTimestamps(chapter, count)
 
-  const out = { timestamps, audioByAyah }
+  const file = await fetchChapterRecitation(reciterId, chapter)
+  const out: ChapterAudioPack = {
+    audioUrl: localChapterAudioPath(reciterId, chapter),
+    timestamps: mapAbsoluteTimestamps(file.timestamps),
+  }
   packCache.set(key, out)
-  cacheSet('audio-pack', key, packToStore(out))
+  cacheSet(PACK_NS, key, out)
+  upstreamUrlCache.set(key, file.audio_url!)
   return out
 }
 

@@ -1,35 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { everyayahUrl, getReciter } from '@/data/reciters'
+import { getReciter } from '@/data/reciters'
+import { resolveChapterAudioUrl } from '@/api/quranAudio'
 
 export const runtime = 'nodejs'
 
 export async function GET(req: NextRequest) {
   const reciter = Number(req.nextUrl.searchParams.get('reciter'))
   const surah = Number(req.nextUrl.searchParams.get('surah'))
-  const ayah = Number(req.nextUrl.searchParams.get('ayah'))
 
   if (
     !Number.isFinite(reciter) ||
     !Number.isFinite(surah) ||
-    !Number.isFinite(ayah) ||
     surah < 1 ||
-    surah > 114 ||
-    ayah < 1 ||
-    ayah > 286
+    surah > 114
   ) {
     return NextResponse.json({ error: 'bad params' }, { status: 400 })
   }
 
-  // Validate known reciter
   getReciter(reciter)
 
-  const upstream = everyayahUrl(reciter, surah, ayah)
+  let upstream: string
+  try {
+    upstream = await resolveChapterAudioUrl(reciter, surah)
+  } catch {
+    return NextResponse.json({ error: 'resolve failed' }, { status: 502 })
+  }
+
   const range = req.headers.get('range')
 
   try {
     const res = await fetch(upstream, {
       headers: range ? { Range: range } : undefined,
-      // Cache at the edge/server a bit; browser still gets our Cache-Control.
       next: { revalidate: 86400 },
     })
 
