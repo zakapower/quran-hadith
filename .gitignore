@@ -10,3 +10,7 @@ dist
 .vercel
 *.tsbuildinfo
 screenshots/
+
+# Serwist
+public/sw*
+public/swe-worker*
