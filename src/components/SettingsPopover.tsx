@@ -11,7 +11,11 @@ import {
 } from '../context/AppContext'
 import './SettingsPopover.css'
 
-export function SettingsPopover() {
+export function SettingsPopover({
+  variant = 'icon',
+}: {
+  variant?: 'icon' | 'menu'
+}) {
   const {
     t,
     fontAr,
@@ -49,21 +53,42 @@ export function SettingsPopover() {
     fontAr !== FONT_SCALE_DEFAULT || fontTr !== FONT_SCALE_DEFAULT
 
   return (
-    <div className="settings" ref={rootRef}>
-      <button
-        type="button"
-        className={`ctrl${open ? ' ctrl--open' : ''}`}
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-controls={open ? titleId : undefined}
-        aria-label={t('Настройки', 'Settings')}
-        title={t('Настройки', 'Settings')}
-      >
-        <span className="ctrl__stack" aria-hidden="true">
-          <Settings className="ctrl__gear" strokeWidth={2} />
-        </span>
-      </button>
+    <div
+      className={`settings${variant === 'menu' ? ' settings--menu' : ''}`}
+      ref={rootRef}
+    >
+      {variant === 'menu' ? (
+        <button
+          type="button"
+          className={`site-menu__action${open ? ' is-active' : ''}`}
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-controls={open ? titleId : undefined}
+        >
+          <Settings
+            className="site-menu__action-icon"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          <span>{t('Настройки', 'Settings')}</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={`ctrl${open ? ' ctrl--open' : ''}`}
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-controls={open ? titleId : undefined}
+          aria-label={t('Настройки', 'Settings')}
+          title={t('Настройки', 'Settings')}
+        >
+          <span className="ctrl__stack" aria-hidden="true">
+            <Settings className="ctrl__gear" strokeWidth={2} />
+          </span>
+        </button>
+      )}
 
       {open && (
         <div

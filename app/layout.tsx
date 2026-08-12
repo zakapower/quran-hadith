@@ -72,13 +72,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <div className="app-shell">
               <Header />
               <main>{children}</main>
-              <footer className="site-footer">
-                <span className="site-footer__brand">Tilāwah</span>
-                <span className="site-footer__dot" aria-hidden="true">
-                  ·
-                </span>
-                <span className="site-footer__arabic">تلاوة</span>
-              </footer>
             </div>
             <QuranPlayerBar />
           </QuranAudioProvider>

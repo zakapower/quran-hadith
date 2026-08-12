@@ -81,9 +81,67 @@
 
 .settings__row input[type='range'] {
   width: 100%;
-  margin: 0;
-  accent-color: var(--accent);
+  height: 18px;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  background: transparent;
   cursor: pointer;
+  accent-color: var(--accent);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.settings__row input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: var(--line);
+}
+
+.settings__row input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--accent);
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+.settings__row input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: var(--line);
+}
+
+.settings__row input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--accent);
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+.settings__row input[type='range']:focus-visible {
+  outline: none;
+}
+
+.settings__row input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.settings__row input[type='range']:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .settings__reset {
@@ -191,13 +249,20 @@
 }
 
 @media (max-width: 720px) {
-  .settings__panel {
+  .settings:not(.settings--menu) .settings__panel {
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 7.25rem);
     right: max(0.75rem, env(safe-area-inset-right, 0px));
     left: max(0.75rem, env(safe-area-inset-left, 0px));
     width: auto;
     max-width: none;
+  }
+
+  .settings--menu .settings__panel {
+    position: static;
+    width: 100%;
+    margin-top: 0.35rem;
+    box-shadow: none;
   }
 
   .settings__reset {
