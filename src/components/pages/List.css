@@ -135,23 +135,19 @@
   background: var(--surface);
   text-decoration: none;
   color: var(--ink);
-  transform: translateZ(0);
   transition:
-    border-color 0.22s ease,
-    background-color 0.22s ease,
-    transform 0.22s ease;
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .card-list li a:hover {
     border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-    background: color-mix(in srgb, var(--accent) 7%, var(--surface));
-    transform: translateY(-2px);
+    background: color-mix(in srgb, var(--accent) 5%, var(--surface));
   }
 
-  .card-list li a:active {
-    transform: translateY(0);
-    transition-duration: 0.1s;
+  .card-list li a:hover .card-list__body strong {
+    color: var(--accent);
   }
 }
 
@@ -175,6 +171,7 @@
   align-items: baseline;
   font-size: 1.05rem;
   font-weight: 600;
+  transition: color 0.15s ease;
 }
 
 .card-list__ar {
@@ -232,9 +229,8 @@
     transition: none;
   }
 
-  .card-list li a:hover,
-  .card-list li a:active {
-    transform: none;
+  .card-list li a:hover .card-list__body strong {
+    color: inherit;
   }
 }
 
