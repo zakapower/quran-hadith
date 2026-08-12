@@ -2,6 +2,7 @@ import type { HadithCollectionMeta, HadithItem, HadithSectionMeta, Lang } from '
 import { getHadithCollection } from '../data/hadithCatalog'
 import { sectionNameRu } from '../data/hadithSectionsRu'
 import { cacheGet, cacheSet, warmCache } from '../utils/pageCache'
+import { normalizeHadithText } from '../utils/hadithText'
 
 const CDN = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1'
 const INFO = `${CDN}/info.min.json`
@@ -41,9 +42,10 @@ const SECTIONS_NS = 'hadith-sections'
 const SECTION_NS = 'hadith-section'
 
 let infoCache: Record<string, InfoBook> | null = null
+let infoPromise: Promise<Record<string, InfoBook>> | null = null
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { cache: 'force-cache' })
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, { cache: 'force-cache', ...init })
   if (!res.ok) throw new Error(`Failed to load ${url}`)
   return (await res.json()) as T
 }
@@ -55,9 +57,17 @@ async function getInfo() {
     infoCache = fromStore
     return infoCache
   }
-  infoCache = await fetchJson<Record<string, InfoBook>>(INFO)
-  cacheSet('hadith-info', 'info', infoCache)
-  return infoCache
+  if (!infoPromise) {
+    // info.min.json > 2MB — Next data cache rejects it; dedupe in-flight fetches.
+    infoPromise = fetchJson<Record<string, InfoBook>>(INFO, {
+      cache: 'no-store',
+    }).then((data) => {
+      infoCache = data
+      cacheSet('hadith-info', 'info', data)
+      return data
+    })
+  }
+  return infoPromise
 }
 
 function translationEdition(col: HadithCollectionMeta, lang: Lang) {
@@ -146,8 +156,8 @@ function mapHadiths(
     .map((n) => {
       const ar = arMap.get(n)
       const tr = trMap.get(n)
-      const arabicText = ar?.text?.trim()
-      const text = tr?.text?.trim() ?? ''
+      const arabicText = ar?.text ? normalizeHadithText(ar.text) : undefined
+      const text = tr?.text ? normalizeHadithText(tr.text) : ''
       return {
         id: `${bookId}-${n}`,
         number: n,
@@ -184,6 +194,23 @@ export async function fetchHadithSection(
   const items = mapHadiths(bookId, arabic.hadiths ?? [], translation.hadiths ?? [])
   cacheSet(SECTION_NS, key, items)
   return items
+}
+
+export function seedHadithSections(
+  bookId: string,
+  lang: Lang,
+  sections: HadithSectionMeta[],
+) {
+  cacheSet(SECTIONS_NS, sectionsKey(bookId, lang), sections)
+}
+
+export function seedHadithSection(
+  bookId: string,
+  sectionId: string,
+  lang: Lang,
+  items: HadithItem[],
+) {
+  cacheSet(SECTION_NS, sectionItemsKey(bookId, sectionId, lang), items)
 }
 
 /** Prefetch adjacent hadith chapters. */

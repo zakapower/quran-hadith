@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { fetchHadithSections, peekHadithSections } from '@/api/hadith'
+import { fetchHadithSections, peekHadithSections, seedHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithSectionMeta } from '@/data/types'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
@@ -18,17 +18,32 @@ import { useApp } from '@/context/AppContext'
 import './List.css'
 import './Reader.css'
 
-export function HadithBookView() {
+export function HadithBookView({
+  initialByLang,
+}: {
+  initialByLang?: Partial<Record<'ru' | 'en', HadithSectionMeta[]>>
+} = {}) {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const { lang, t } = useApp()
   const book = params.id ? getHadithCollection(params.id) : undefined
-  const [sections, setSections] = useState<HadithSectionMeta[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [sections, setSections] = useState<HadithSectionMeta[] | null>(() => {
+    if (!book) return null
+    return initialByLang?.[lang] ?? peekHadithSections(book.id, lang)
+  })
+  const [error, setError] = useState<string | null>(() =>
+    book ? null : 'missing',
+  )
   const [query, setQuery] = useState('')
   const listPath = book ? `/hadith/${book.id}` : ''
 
   useRestoreListScroll(listPath, Boolean(sections) && !query.trim())
+
+  useEffect(() => {
+    if (!book) return
+    if (initialByLang?.ru) seedHadithSections(book.id, 'ru', initialByLang.ru)
+    if (initialByLang?.en) seedHadithSections(book.id, 'en', initialByLang.en)
+  }, [book, initialByLang])
 
   useEffect(() => {
     if (!book) {
@@ -38,9 +53,11 @@ export function HadithBookView() {
     let cancelled = false
     setError(null)
 
-    const cached = peekHadithSections(book.id, lang)
+    const fromInitial = initialByLang?.[lang]
+    const cached = fromInitial ?? peekHadithSections(book.id, lang)
     if (cached) {
       setSections(cached)
+      if (fromInitial) seedHadithSections(book.id, lang, fromInitial)
       return
     }
 
@@ -57,7 +74,7 @@ export function HadithBookView() {
     return () => {
       cancelled = true
     }
-  }, [book, lang])
+  }, [book, lang, initialByLang])
 
   const hadithNum = useMemo(() => parseHadithNumber(query), [query])
 

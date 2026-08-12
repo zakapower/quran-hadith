@@ -4,15 +4,31 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { fetchHadithSection, fetchHadithSections, peekHadithSection, peekHadithSections, prefetchNearbyHadithSections } from '@/api/hadith'
+import { fetchHadithSection, fetchHadithSections, peekHadithSection, peekHadithSections, prefetchNearbyHadithSections, seedHadithSection, seedHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithItem, HadithSectionMeta } from '@/data/types'
 import { CopyQuoteButton } from '@/components/CopyQuoteButton'
+import { FavoriteButton } from '@/components/FavoriteButton'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
 import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
 import { parseHadithParam } from '@/utils/hadithRef'
+import { normalizeHadithText, splitHadithLead } from '@/utils/hadithText'
 import { useApp } from '@/context/AppContext'
 import './Reader.css'
+
+function HadithTranslation({ text }: { text: string }) {
+  const cleaned = normalizeHadithText(text).replace(/\s*\n\s*/g, ' ')
+  const parts = splitHadithLead(cleaned)
+  if (!parts) {
+    return <p className="ayah__tr">{cleaned}</p>
+  }
+  return (
+    <p className="ayah__tr">
+      <strong className="ayah__tr-lead">{parts.lead}</strong>
+      {parts.body}
+    </p>
+  )
+}
 
 function HadithSectionNav({
   bookId,
@@ -66,16 +82,50 @@ function HadithSectionNav({
   )
 }
 
-export function HadithSectionView() {
+export function HadithSectionView({
+  initialByLang,
+}: {
+  initialByLang?: Partial<
+    Record<
+      'ru' | 'en',
+      { sections: HadithSectionMeta[]; hadiths: HadithItem[]; title: string }
+    >
+  >
+} = {}) {
   const params = useParams<{ id: string; sectionId: string }>()
   const searchParams = useSearchParams()
   const { lang, t } = useApp()
   const book = params.id ? getHadithCollection(params.id) : undefined
   const sectionId = params.sectionId
-  const [title, setTitle] = useState<string>('')
-  const [sections, setSections] = useState<HadithSectionMeta[] | null>(null)
-  const [hadiths, setHadiths] = useState<HadithItem[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
+
+  const boot = () => {
+    if (!book || !sectionId) return null
+    const init = initialByLang?.[lang]
+    if (init) return init
+    const secs = peekHadithSections(book.id, lang)
+    const items = peekHadithSection(book.id, sectionId, lang)
+    if (secs && items) {
+      const sec = secs.find((s) => s.id === sectionId)
+      return {
+        sections: secs,
+        hadiths: items,
+        title: sec?.name ?? sectionId,
+      }
+    }
+    return null
+  }
+
+  const started = boot()
+  const [title, setTitle] = useState<string>(started?.title ?? '')
+  const [sections, setSections] = useState<HadithSectionMeta[] | null>(
+    started?.sections ?? null,
+  )
+  const [hadiths, setHadiths] = useState<HadithItem[] | null>(
+    started?.hadiths ?? null,
+  )
+  const [error, setError] = useState<string | null>(() =>
+    book && sectionId ? null : 'missing',
+  )
   const readerPath =
     book && sectionId ? `/hadith/${book.id}/${sectionId}` : null
 
@@ -102,6 +152,16 @@ export function HadithSectionView() {
   }, [sections, sectionId])
 
   useEffect(() => {
+    if (!book || !sectionId) return
+    for (const l of ['ru', 'en'] as const) {
+      const pack = initialByLang?.[l]
+      if (!pack) continue
+      seedHadithSections(book.id, l, pack.sections)
+      seedHadithSection(book.id, sectionId, l, pack.hadiths)
+    }
+  }, [book, sectionId, initialByLang])
+
+  useEffect(() => {
     if (!book || !sectionId) {
       setError('missing')
       return
@@ -109,13 +169,19 @@ export function HadithSectionView() {
     let cancelled = false
     setError(null)
 
-    const cachedSecs = peekHadithSections(book.id, lang)
-    const cachedItems = peekHadithSection(book.id, sectionId, lang)
+    const init = initialByLang?.[lang]
+    const cachedSecs = init?.sections ?? peekHadithSections(book.id, lang)
+    const cachedItems =
+      init?.hadiths ?? peekHadithSection(book.id, sectionId, lang)
     if (cachedSecs && cachedItems) {
       const sec = cachedSecs.find((s) => s.id === sectionId)
       setSections(cachedSecs)
-      setTitle(sec?.name ?? sectionId)
+      setTitle(init?.title ?? sec?.name ?? sectionId)
       setHadiths(cachedItems)
+      if (init) {
+        seedHadithSections(book.id, lang, init.sections)
+        seedHadithSection(book.id, sectionId, lang, init.hadiths)
+      }
       prefetchNearbyHadithSections(
         book.id,
         sectionId,
@@ -152,7 +218,7 @@ export function HadithSectionView() {
     return () => {
       cancelled = true
     }
-  }, [book, sectionId, lang])
+  }, [book, sectionId, lang, initialByLang])
 
   useEffect(() => {
     if (!hadiths || !highlight || !book) return
@@ -176,7 +242,7 @@ export function HadithSectionView() {
   }
 
   return (
-    <div className="reader">
+    <div className="reader reader--wide">
       <nav className="reader__crumb">
         <Link href="/hadith">{t('Хадисы', 'Hadith')}</Link>
         <span aria-hidden="true">/</span>
@@ -215,26 +281,49 @@ export function HadithSectionView() {
           <div className="ayah-list">
             {hadiths.map((h) => {
               const hit = highlight === h.number
+              const translation = h.text ? normalizeHadithText(h.text) : ''
+              const arabic = h.arabic ? normalizeHadithText(h.arabic) : ''
+              const copyBody = translation || arabic
               return (
                 <article
                   key={h.id}
-                  className={hit ? 'ayah ayah--hit' : 'ayah'}
+                  className={hit ? 'ayah ayah--hit ayah--hadith' : 'ayah ayah--hadith'}
                   id={h.id}
                 >
                   <div className="ayah__top">
                     <p className="ayah__n">{h.number}</p>
-                    <CopyQuoteButton
-                      heading={`${book.title[lang]} ${h.number}`}
-                      body={h.text || h.arabic || ''}
-                      label={t('Копировать хадис', 'Copy hadith')}
-                    />
+                    <div className="ayah__actions">
+                      <FavoriteButton
+                        kind="hadith"
+                        bookId={book.id}
+                        sectionId={sectionId}
+                        number={h.number}
+                        bookTitle={book.title[lang]}
+                        snippet={copyBody}
+                      />
+                      <CopyQuoteButton
+                        heading={`${book.title[lang]} ${h.number}`}
+                        body={copyBody}
+                        label={t('Копировать хадис', 'Copy hadith')}
+                      />
+                    </div>
                   </div>
-                  {h.arabic && (
-                    <p className="ayah__ar" dir="rtl" lang="ar">
-                      {h.arabic}
-                    </p>
+                  {(translation || arabic) && (
+                    <div
+                      className={
+                        translation && arabic
+                          ? 'ayah__bilingual'
+                          : 'ayah__bilingual ayah__bilingual--solo'
+                      }
+                    >
+                      {translation && <HadithTranslation text={translation} />}
+                      {arabic && (
+                        <p className="ayah__ar" dir="rtl" lang="ar">
+                          {arabic}
+                        </p>
+                      )}
+                    </div>
                   )}
-                  {h.text && <p className="ayah__tr">{h.text}</p>}
                 </article>
               )
             })}

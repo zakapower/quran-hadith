@@ -168,7 +168,13 @@
   margin-top: 0;
 }
 
-/* Как у .ayah__copy */
+/* Как у .ayah__copy / .ayah__actions */
+.reader-skel__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .reader-skel__icon {
   width: 2rem;
   height: 2rem;

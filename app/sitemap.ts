@@ -3,7 +3,7 @@ import { getSiteOrigin } from '@/lib/site'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = getSiteOrigin()
-  const staticPaths = ['/', '/quran', '/hadith'] as const
+  const staticPaths = ['/', '/quran', '/hadith', '/favorites', '/about'] as const
   const now = new Date()
 
   const entries: MetadataRoute.Sitemap = staticPaths.map((path) => ({

@@ -1,19 +1,14 @@
 import type { Metadata } from 'next'
 import { HomeView } from '@/components/pages/HomeView'
 import { getSurahList } from '@/data/surahList'
-import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageAlternatesMetadataBase } from '@/lib/site'
 
+export const dynamic = 'force-static'
+
 export async function generateMetadata(): Promise<Metadata> {
-  const lang = await getRequestLang()
-  const title =
-    lang === 'ru'
-      ? 'Tilāwah – Коран и хадисы'
-      : 'Tilāwah – Qur’an and Hadith'
+  const title = 'Tilāwah – Коран и хадисы / Qur’an and Hadith'
   const description =
-    lang === 'ru'
-      ? 'Tilāwah – минималистичное чтение Корана и хадисов. Русский / English.'
-      : 'Tilāwah – minimal Qur’an and Hadith reading. Russian / English.'
+    'Tilāwah – минималистичное чтение Корана и хадисов. Minimal Qur’an and Hadith reading.'
 
   return {
     metadataBase: pageAlternatesMetadataBase('/'),

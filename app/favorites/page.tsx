@@ -1,22 +1,22 @@
 import type { Metadata } from 'next'
-import { HadithListView } from '@/components/pages/HadithListView'
+import { FavoritesView } from '@/components/pages/FavoritesView'
 import { clipDescription, pageAlternates } from '@/lib/site'
 
 export const dynamic = 'force-static'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Хадисы / Hadith – Tilāwah'
+  const title = 'Избранное / Favorites – Tilāwah'
   const description =
-    'Сахих аль-Бухари и Сахих Муслим. Sahih al-Bukhari and Sahih Muslim.'
+    'Сохранённые аяты Корана и хадисы. Saved Qur’an ayahs and hadith.'
 
   return {
     title,
     description: clipDescription(description),
-    alternates: pageAlternates('/hadith'),
+    alternates: pageAlternates('/favorites'),
     openGraph: { title, description: clipDescription(description) },
   }
 }
 
-export default function HadithPage() {
-  return <HadithListView />
+export default function FavoritesPage() {
+  return <FavoritesView />
 }

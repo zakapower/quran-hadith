@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
-import { fetchSurah, peekSurah, prefetchNearbySurahs } from '@/api/quran'
+import { fetchSurah, peekSurah, prefetchNearbySurahs, seedSurah } from '@/api/quran'
 import type { SurahContent } from '@/data/types'
 import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import { parseAyahParam } from '@/utils/ayahRef'
 import { CopyAyahButton } from '@/components/CopyAyahButton'
+import { FavoriteButton } from '@/components/FavoriteButton'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
 import { useReaderScrollMemory } from '@/hooks/useReaderScrollMemory'
 import { useApp } from '@/context/AppContext'
@@ -109,15 +110,30 @@ function SurahNav({
   )
 }
 
-export function SurahView() {
+export function SurahView({
+  initialByLang,
+}: {
+  initialByLang?: Partial<Record<'ru' | 'en', SurahContent>>
+} = {}) {
   const params = useParams<{ number: string }>()
   const searchParams = useSearchParams()
   const { lang, t } = useApp()
   const audio = useQuranAudio()
-  const [surah, setSurah] = useState<SurahContent | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
   const n = Number(params.number)
+
+  const [surah, setSurah] = useState<SurahContent | null>(() => {
+    if (!Number.isFinite(n) || n < 1 || n > 114) return null
+    return initialByLang?.[lang] ?? peekSurah(n, lang)
+  })
+  const [error, setError] = useState<string | null>(() =>
+    Number.isFinite(n) && n >= 1 && n <= 114 ? null : 'missing',
+  )
+
+  useEffect(() => {
+    if (initialByLang?.ru) seedSurah(initialByLang.ru, 'ru')
+    if (initialByLang?.en) seedSurah(initialByLang.en, 'en')
+  }, [initialByLang])
+
   const readerPath =
     Number.isFinite(n) && n >= 1 && n <= 114 ? `/quran/${n}` : null
   const title = surah
@@ -149,9 +165,11 @@ export function SurahView() {
     let cancelled = false
     setError(null)
 
-    const cached = peekSurah(n, lang)
+    const fromInitial = initialByLang?.[lang]
+    const cached = fromInitial ?? peekSurah(n, lang)
     if (cached) {
       setSurah(cached)
+      if (fromInitial) seedSurah(fromInitial, lang)
       prefetchNearbySurahs(n, lang)
       return
     }
@@ -170,7 +188,7 @@ export function SurahView() {
     return () => {
       cancelled = true
     }
-  }, [n, lang])
+  }, [n, lang, initialByLang])
 
   useEffect(() => {
     if (!surah || !highlight) return
@@ -292,6 +310,12 @@ export function SurahView() {
                           <Play strokeWidth={2} aria-hidden="true" />
                         )}
                       </button>
+                      <FavoriteButton
+                        kind="ayah"
+                        surah={surah.number}
+                        ayah={a.numberInSurah}
+                        snippet={surah.ayahsTranslation[i]?.text ?? a.text}
+                      />
                       <CopyAyahButton
                         surah={surah.number}
                         ayah={a.numberInSurah}

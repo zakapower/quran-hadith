@@ -78,6 +78,11 @@ export async function fetchSurah(
   return content
 }
 
+/** Warm client/server memory cache (e.g. after SSG props). */
+export function seedSurah(content: SurahContent, lang: 'ru' | 'en') {
+  cacheSet(CACHE_NS, cacheKey(content.number, lang), content)
+}
+
 /** Prefetch neighbors so next/prev surah opens instantly. */
 export function prefetchNearbySurahs(number: number, lang: 'ru' | 'en') {
   if (number > 1) warmCache(() => fetchSurah(number - 1, lang))

@@ -87,7 +87,11 @@ export function ReaderSkeleton({ variant = 'hadith', number }: Props) {
             <div key={i} className="reader-skel__card reader-skel__card--ayah">
               <div className="reader-skel__card-top">
                 <div className="reader-skel__bone reader-skel__badge" />
-                <div className="reader-skel__bone reader-skel__icon" />
+                <div className="reader-skel__actions">
+                  <div className="reader-skel__bone reader-skel__icon" />
+                  <div className="reader-skel__bone reader-skel__icon" />
+                  <div className="reader-skel__bone reader-skel__icon" />
+                </div>
               </div>
               <div className="reader-skel__ayah-ar">
                 <div
@@ -108,7 +112,10 @@ export function ReaderSkeleton({ variant = 'hadith', number }: Props) {
             <div key={i} className="reader-skel__card reader-skel__card--hadith">
               <div className="reader-skel__card-top">
                 <div className="reader-skel__bone reader-skel__badge reader-skel__badge--hadith" />
-                <div className="reader-skel__bone reader-skel__icon" />
+                <div className="reader-skel__actions">
+                  <div className="reader-skel__bone reader-skel__icon" />
+                  <div className="reader-skel__bone reader-skel__icon" />
+                </div>
               </div>
               <div
                 className="reader-skel__bone reader-skel__line reader-skel__line--tr"

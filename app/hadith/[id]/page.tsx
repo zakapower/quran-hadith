@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import { HadithBookView } from '@/components/pages/HadithBookView'
+import { fetchHadithSections } from '@/api/hadith'
 import { getHadithCollection, hadithCollections } from '@/data/hadithCatalog'
-import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates } from '@/lib/site'
+
+export const dynamic = 'force-static'
 
 export function generateStaticParams() {
   return hadithCollections.map((b) => ({ id: b.id }))
@@ -14,18 +16,13 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const lang = await getRequestLang()
   const book = getHadithCollection(id)
   const title = book
-    ? `${book.title[lang]} – Tilāwah`
-    : lang === 'ru'
-      ? 'Не найдено – Tilāwah'
-      : 'Not found – Tilāwah'
+    ? `${book.title.ru} / ${book.title.en} – Tilāwah`
+    : 'Hadith – Tilāwah'
   const description = book
-    ? book.narrator[lang]
-    : lang === 'ru'
-      ? 'Сборник хадисов не найден.'
-      : 'Hadith collection not found.'
+    ? `${book.narrator.ru}. ${book.narrator.en}.`
+    : 'Hadith collection.'
 
   return {
     title,
@@ -35,6 +32,28 @@ export async function generateMetadata({
   }
 }
 
-export default function HadithBookPage() {
-  return <HadithBookView />
+export default async function HadithBookPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const book = getHadithCollection(id)
+  let initialByLang: {
+    ru?: Awaited<ReturnType<typeof fetchHadithSections>>
+    en?: Awaited<ReturnType<typeof fetchHadithSections>>
+  } = {}
+
+  if (book) {
+    const [ru, en] = await Promise.all([
+      fetchHadithSections(book.id, 'ru').catch(() => null),
+      fetchHadithSections(book.id, 'en').catch(() => null),
+    ])
+    initialByLang = {
+      ...(ru ? { ru } : {}),
+      ...(en ? { en } : {}),
+    }
+  }
+
+  return <HadithBookView initialByLang={initialByLang} />
 }
