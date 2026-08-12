@@ -4,6 +4,7 @@ import {
   CacheableResponsePlugin,
   CacheFirst,
   ExpirationPlugin,
+  NetworkOnly,
   Serwist,
 } from 'serwist'
 
@@ -14,6 +15,14 @@ declare global {
 }
 
 declare const self: ServiceWorkerGlobalScope
+
+const audioRangeBypass: RuntimeCaching = {
+  matcher: ({ url, sameOrigin, request }) =>
+    sameOrigin &&
+    url.pathname === '/api/quran-audio' &&
+    Boolean(request.headers.get('range')),
+  handler: new NetworkOnly(),
+}
 
 const audioCache: RuntimeCaching = {
   matcher: ({ url, sameOrigin }) =>
@@ -36,7 +45,9 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
+  disableDevLogs: true,
   runtimeCaching: [
+    audioRangeBypass,
     audioCache, // must stay before defaultCache
     ...defaultCache,
   ],
