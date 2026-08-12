@@ -1,4 +1,26 @@
+import { spawnSync } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
+import withSerwistInit from '@serwist/next'
 import type { NextConfig } from 'next'
+
+const revision =
+  spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf-8' }).stdout?.trim() ||
+  randomUUID()
+
+const withSerwist = withSerwistInit({
+  swSrc: 'app/sw.ts',
+  swDest: 'public/sw.js',
+  disable: process.env.NODE_ENV === 'development',
+  cacheOnNavigation: true,
+  reloadOnOnline: false,
+  additionalPrecacheEntries: [
+    { url: '/offline', revision },
+    { url: '/fonts/UthmanicHafs1Ver18.woff2', revision },
+    { url: '/icons/icon-192.png', revision },
+    { url: '/icons/icon-512.png', revision },
+    { url: '/icons/icon-maskable-512.png', revision },
+  ],
+})
 
 const nextConfig: NextConfig = {
   devIndicators: false,
@@ -35,4 +57,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withSerwist(nextConfig)
