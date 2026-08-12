@@ -10,14 +10,24 @@ const CHAPTER_WIDTHS = ['72%', '64%', '80%', '58%', '76%', '68%', '74%', '62%'] 
 
 type Props = {
   variant?: ReaderSkeletonVariant
+  /** Surah 1–114: hide edge arrows like real SurahNav (no prev on 1, no next on 114). */
+  number?: number
 }
 
-export function ReaderSkeleton({ variant = 'hadith' }: Props) {
+function navBtnClass(ghost: boolean) {
+  return `reader-skel__bone reader-skel__nav-btn${
+    ghost ? ' reader-skel__nav-btn--ghost' : ''
+  }`
+}
+
+export function ReaderSkeleton({ variant = 'hadith', number }: Props) {
   const isChapters = variant === 'chapters'
   const isSurah = variant === 'surah'
   const isHadith = variant === 'hadith'
   const showNav = isSurah || isHadith
   const count = isChapters ? 8 : 5
+  const hidePrev = isSurah && number != null && number <= 1
+  const hideNext = isSurah && number != null && number >= 114
 
   return (
     <div
@@ -42,9 +52,9 @@ export function ReaderSkeleton({ variant = 'hadith' }: Props) {
             <>
               <div className="reader-skel__bone reader-skel__nav-meta" />
               <div className="reader-skel__nav-row">
+                <div className={navBtnClass(hidePrev)} />
                 <div className="reader-skel__bone reader-skel__nav-btn" />
-                <div className="reader-skel__bone reader-skel__nav-btn" />
-                <div className="reader-skel__bone reader-skel__nav-btn" />
+                <div className={navBtnClass(hideNext)} />
               </div>
             </>
           ) : (
@@ -119,13 +129,13 @@ export function ReaderSkeleton({ variant = 'hadith' }: Props) {
 
       {showNav && (
         <div className="reader-skel__nav reader-skel__nav--bottom">
-          <div className="reader-skel__bone reader-skel__nav-btn" />
+          <div className={navBtnClass(hidePrev)} />
           {isSurah ? (
             <span className="reader-skel__nav-spacer" aria-hidden="true" />
           ) : (
             <div className="reader-skel__bone reader-skel__nav-meta" />
           )}
-          <div className="reader-skel__bone reader-skel__nav-btn" />
+          <div className={navBtnClass(hideNext)} />
         </div>
       )}
     </div>

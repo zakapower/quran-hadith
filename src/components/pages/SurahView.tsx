@@ -202,7 +202,7 @@ export function SurahView() {
         </p>
       )}
       {!surah && !error && (
-        <ReaderSkeleton variant="surah" />
+        <ReaderSkeleton variant="surah" number={n} />
       )}
 
       {surah && title && (

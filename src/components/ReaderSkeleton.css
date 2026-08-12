@@ -102,6 +102,14 @@
   flex-shrink: 0;
 }
 
+/* Match .reader__nav-btn--ghost — keep layout, hide bone on surah 1 / 114 */
+.reader-skel__nav-btn--ghost {
+  visibility: hidden;
+  border: 0;
+  background: transparent;
+  animation: none;
+}
+
 .reader-skel__nav-meta {
   width: min(9.5rem, 42%);
   height: 0.9rem;

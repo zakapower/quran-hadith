@@ -152,28 +152,6 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     if (pathname !== `/quran/${surah}`) close()
   }, [pathname, surah, visible, close])
 
-  useEffect(() => {
-    if (!visible) return
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' && e.key !== ' ') return
-      const target = e.target as HTMLElement | null
-      if (
-        target &&
-        (target.closest('input, textarea, select, [contenteditable="true"]') ||
-          target.isContentEditable)
-      ) {
-        return
-      }
-      e.preventDefault()
-      e.stopPropagation()
-      pause()
-    }
-
-    window.addEventListener('keydown', onKey, { capture: true })
-    return () => window.removeEventListener('keydown', onKey, { capture: true })
-  }, [visible, pause])
-
   const finishSurah = useCallback(() => {
     if (finishingRef.current) return
     finishingRef.current = true
@@ -335,19 +313,51 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
   const nextAyah = useCallback(() => {
     const timestamps = timestampsRef.current
+    const audio = audioRef.current
     if (!ayah || timestamps.length === 0) return
     const idx = timestamps.findIndex((t) => t.ayah === ayah)
     if (idx < 0 || idx >= timestamps.length - 1) return
-    void playAyah(timestamps[idx + 1].ayah, true)
+    const shouldPlay = Boolean(audio && !audio.paused)
+    void playAyah(timestamps[idx + 1].ayah, shouldPlay)
   }, [ayah, playAyah])
 
   const prevAyah = useCallback(() => {
     const timestamps = timestampsRef.current
+    const audio = audioRef.current
     if (!ayah || timestamps.length === 0) return
     const idx = timestamps.findIndex((t) => t.ayah === ayah)
     if (idx <= 0) return
-    void playAyah(timestamps[idx - 1].ayah, true)
+    const shouldPlay = Boolean(audio && !audio.paused)
+    void playAyah(timestamps[idx - 1].ayah, shouldPlay)
   }, [ayah, playAyah])
+
+  useEffect(() => {
+    if (!visible) return
+
+    const onKey = (e: KeyboardEvent) => {
+      const isSpace = e.code === 'Space' || e.key === ' '
+      const isPrev = e.code === 'ArrowLeft' || e.key === 'ArrowLeft'
+      const isNext = e.code === 'ArrowRight' || e.key === 'ArrowRight'
+      if (!isSpace && !isPrev && !isNext) return
+
+      const target = e.target as HTMLElement | null
+      if (
+        target &&
+        (target.closest('input, textarea, select, [contenteditable="true"]') ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+      e.preventDefault()
+      e.stopPropagation()
+      if (isSpace) togglePause()
+      else if (isPrev) prevAyah()
+      else nextAyah()
+    }
+
+    window.addEventListener('keydown', onKey, { capture: true })
+    return () => window.removeEventListener('keydown', onKey, { capture: true })
+  }, [visible, togglePause, prevAyah, nextAyah])
 
   const setReciter = useCallback(
     (id: number) => {
