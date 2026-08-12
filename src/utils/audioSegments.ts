@@ -31,10 +31,13 @@ export function findActiveWordIndex(
   segments: WordSegment[],
   tMs: number,
 ): number | null {
+  let lastStarted: number | null = null
   for (const s of segments) {
     if (tMs >= s.startMs && tMs < s.endMs) return s.wordIndex
+    // Gaps between words: keep the last word that already started
+    if (tMs >= s.startMs) lastStarted = s.wordIndex
   }
-  return null
+  return lastStarted
 }
 
 export function parseVerseKeyAyah(verseKey: string): number {

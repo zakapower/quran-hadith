@@ -155,9 +155,7 @@ export function QuranPlayerBar() {
             </button>
             <button
               type="button"
-              className={`quran-player__btn quran-player__btn--main${
-                playing ? ' quran-player__btn--playing' : ''
-              }`}
+              className="quran-player__btn quran-player__btn--main"
               onClick={togglePause}
               aria-label={
                 playing ? t('Пауза', 'Pause') : t('Слушать', 'Play')
@@ -272,9 +270,7 @@ export function QuranPlayerBar() {
             </button>
             <button
               type="button"
-              className={`quran-player__btn quran-player__btn--main${
-                playing ? ' quran-player__btn--playing' : ''
-              }`}
+              className="quran-player__btn quran-player__btn--main"
               onClick={togglePause}
               aria-label={
                 playing ? t('Пауза', 'Pause') : t('Слушать', 'Play')

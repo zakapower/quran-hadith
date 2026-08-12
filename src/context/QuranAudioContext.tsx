@@ -197,8 +197,27 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         await loadAudioSrc(audio, url)
       }
 
+      const targetSec = row.fromMs / 1000
       try {
-        audio.currentTime = row.fromMs / 1000
+        if (Math.abs(audio.currentTime - targetSec) > 0.04) {
+          await new Promise<void>((resolve) => {
+            let done = false
+            const finish = () => {
+              if (done) return
+              done = true
+              audio.removeEventListener('seeked', finish)
+              window.clearTimeout(timer)
+              resolve()
+            }
+            const timer = window.setTimeout(finish, 400)
+            audio.addEventListener('seeked', finish)
+            try {
+              audio.currentTime = targetSec
+            } catch {
+              finish()
+            }
+          })
+        }
       } catch {
         /* ignore */
       }
@@ -207,6 +226,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         await audio.play()
         setPlaying(true)
         setError(null)
+        setActiveWordIndex(
+          findActiveWordIndex(row.segments, audio.currentTime * 1000),
+        )
+      } else {
         setActiveWordIndex(
           findActiveWordIndex(row.segments, audio.currentTime * 1000),
         )

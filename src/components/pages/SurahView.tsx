@@ -281,7 +281,10 @@ export function SurahView({
                           playing ? ' ayah__play--on' : ''
                         }${ayahLive ? ' ayah__play--live' : ''}`}
                         onClick={() => {
-                          if (playing) {
+                          // Pause only while this ayah is actively playing.
+                          // If paused on this ayah (or idle), start/seek via openAndPlay
+                          // so karaoke syncs from the ayah start.
+                          if (ayahLive) {
                             audio.togglePause()
                             return
                           }

@@ -77,8 +77,13 @@ export function Header() {
         onClick={toggleLang}
         aria-label={t('Switch to English', 'Переключить на русский')}
       >
-        <span className="ctrl__label" aria-hidden="true">
-          {lang === 'ru' ? 'EN' : 'RU'}
+        <span className="ctrl__icon-swap" aria-hidden="true">
+          <span className={`ctrl__label${lang === 'ru' ? ' is-active' : ''}`}>
+            EN
+          </span>
+          <span className={`ctrl__label${lang === 'en' ? ' is-active' : ''}`}>
+            RU
+          </span>
         </span>
       </button>
       <button
@@ -91,11 +96,16 @@ export function Header() {
             : t('Светлая тема', 'Light theme')
         }
       >
-        {theme === 'light' ? (
-          <Moon className="ctrl__icon" strokeWidth={2} aria-hidden="true" />
-        ) : (
-          <Sun className="ctrl__icon" strokeWidth={2} aria-hidden="true" />
-        )}
+        <span className="ctrl__icon-swap" aria-hidden="true">
+          <Moon
+            className={`ctrl__icon${theme === 'light' ? ' is-active' : ''}`}
+            strokeWidth={2}
+          />
+          <Sun
+            className={`ctrl__icon${theme === 'dark' ? ' is-active' : ''}`}
+            strokeWidth={2}
+          />
+        </span>
       </button>
       <SettingsPopover />
     </>
@@ -128,7 +138,9 @@ export function Header() {
           <div className="site-controls">
             <button
               type="button"
-              className="ctrl site-controls__burger"
+              className={`ctrl site-controls__burger${
+                menuOpen ? ' site-controls__burger--close' : ''
+              }`}
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
               aria-controls={menuId}
@@ -138,11 +150,16 @@ export function Header() {
                   : t('Открыть меню', 'Open menu')
               }
             >
-              {menuOpen ? (
-                <X className="ctrl__icon" strokeWidth={2} aria-hidden="true" />
-              ) : (
-                <Menu className="ctrl__icon" strokeWidth={2} aria-hidden="true" />
-              )}
+              <span className="ctrl__icon-swap" aria-hidden="true">
+                <Menu
+                  className={`ctrl__icon${menuOpen ? '' : ' is-active'}`}
+                  strokeWidth={2}
+                />
+                <X
+                  className={`ctrl__icon${menuOpen ? ' is-active' : ''}`}
+                  strokeWidth={2.35}
+                />
+              </span>
             </button>
 
             <div className="site-controls__tools">{toolControls}</div>

@@ -146,12 +146,6 @@
   border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
 }
 
-.quran-player__btn--playing {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-}
-
 .quran-player__btn:disabled {
   opacity: 0.55;
   cursor: default;
@@ -385,8 +379,7 @@
     box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
-  .quran-player__btn--main:hover:not(:disabled),
-  .quran-player__btn--playing:hover:not(:disabled) {
+  .quran-player__btn--main:hover:not(:disabled) {
     color: var(--accent);
     border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
     background: color-mix(in srgb, var(--accent) 10%, var(--surface));

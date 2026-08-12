@@ -57,8 +57,6 @@ html {
 
 html.menu-open {
   overflow: hidden;
-  /* Не даём пропаже скроллбара сдвигать вёрстку */
-  scrollbar-gutter: stable;
 }
 
 html[data-theme='dark'] {

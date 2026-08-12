@@ -98,13 +98,17 @@
 .ayah--hit .ayah__fav,
 .ayah--playing .ayah__fav,
 .ayah--hit .ayah__play,
-.ayah--playing .ayah__play,
-.ayah--playing .ayah__play--on,
-.ayah--playing .ayah__play--live {
+.ayah--playing .ayah__play {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
   /* Как у обычных: фон кнопки = фон карточки, иначе scale выглядит как скачок */
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
   color: var(--muted);
+}
+
+/* Keep accent on the ayah play control — do not inherit muted from above */
+.ayah--playing .ayah__play--on,
+.ayah--playing .ayah__play--live {
+  color: var(--accent);
 }
 
 .ayah__top {
@@ -398,6 +402,7 @@
 
 .ayah--playing.ayah--live .ayah__word--active {
   color: var(--accent);
+  font-weight: 700;
 }
 
 .ayah__tr {

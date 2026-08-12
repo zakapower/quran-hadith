@@ -122,9 +122,51 @@
   display: block;
 }
 
+.ctrl__icon-swap {
+  position: relative;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
+}
+
+.ctrl__icon-swap .ctrl__icon {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity 0.2s ease,
+    transform 0.22s ease;
+  pointer-events: none;
+}
+
+.ctrl__icon-swap .ctrl__icon.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .ctrl__label {
   line-height: 1;
   letter-spacing: 0.02em;
+}
+
+.ctrl__icon-swap .ctrl__label {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity 0.2s ease,
+    transform 0.22s ease;
+  pointer-events: none;
+}
+
+.ctrl__icon-swap .ctrl__label.is-active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .ctrl--active {
@@ -245,6 +287,11 @@
     transition: none;
   }
 
+  .ctrl__icon-swap .ctrl__icon,
+  .ctrl__icon-swap .ctrl__label {
+    transition: none;
+  }
+
   .ctrl:hover,
   .ctrl:active {
     transform: none;
@@ -262,13 +309,14 @@
     flex-wrap: wrap;
     align-items: center;
     column-gap: 0.55rem;
-    row-gap: 0;
+    row-gap: 0.7rem;
     z-index: 46;
-    padding: 0.85rem max(0.85rem, env(safe-area-inset-right, 0px)) 0
-      max(0.85rem, env(safe-area-inset-left, 0px));
+    padding: 0.85rem max(1rem, env(safe-area-inset-right, 0px)) 0
+      max(1rem, env(safe-area-inset-left, 0px));
   }
 
   .brand {
+    order: 1;
     justify-self: auto;
   }
 
@@ -277,6 +325,7 @@
   }
 
   .site-controls {
+    order: 2;
     margin-left: auto;
     justify-self: auto;
     gap: 0.35rem;
@@ -291,11 +340,27 @@
     display: inline-flex;
   }
 
+  .site-controls__burger--close {
+    color: var(--ink);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+    background: var(--surface);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--surface) 80%, transparent);
+  }
+
   .site-controls__tools {
     display: none;
   }
 
+  /* Keep brand / tabs / burger above the dim overlay so the X stays visible */
+  .site-header--menu-open .site-header__inner {
+    position: relative;
+    z-index: 48;
+    background: var(--bg);
+  }
+
   .site-nav {
+    order: 3;
+    flex: 1 0 100%;
     width: 100%;
     margin: 0;
     padding: 0;
@@ -331,7 +396,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 35;
+    z-index: 36;
     border: none;
     padding: 0;
     margin: 0;
@@ -342,11 +407,12 @@
 
   .site-menu {
     display: block;
+    order: 4;
     position: absolute;
-    top: calc(0.85rem + 2.5rem + 0.35rem);
+    top: calc(0.85rem + 2.5rem + 0.7rem);
     left: max(0.55rem, env(safe-area-inset-left, 0px));
     right: max(0.55rem, env(safe-area-inset-right, 0px));
-    z-index: 47;
+    z-index: 49;
     margin: 0;
     padding: 0.45rem;
     border: 1px solid var(--line);
