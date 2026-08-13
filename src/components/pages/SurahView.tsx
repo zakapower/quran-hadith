@@ -16,6 +16,20 @@ import { useApp } from '@/context/AppContext'
 import { useQuranAudio } from '@/context/QuranAudioContext'
 import './Reader.css'
 
+/** Map Quran.com karaoke word index onto locally displayed word tokens. */
+function mapKaraokeWordIndex(
+  qcIndex: number | null,
+  qcLen: number,
+  displayLen: number,
+): number | null {
+  if (qcIndex == null || qcLen <= 0 || displayLen <= 0) return null
+  if (qcLen === displayLen) return qcIndex
+  return Math.min(
+    displayLen,
+    Math.max(1, Math.round((qcIndex * displayLen) / qcLen)),
+  )
+}
+
 function SurahNav({
   n,
   top = false,
@@ -202,7 +216,14 @@ export function SurahView({
 
   useReaderScrollMemory(readerPath, Boolean(surah), Boolean(highlight))
 
+  useEffect(() => {
+    if (!Number.isFinite(n) || n < 1 || n > 114) return
+    audio.ensureWords(n)
+  }, [n, audio.ensureWords])
+
   const playerOpen = audio.visible && audio.surah === n
+  const chapterWords =
+    audio.wordsChapter === n ? audio.wordsByAyah : null
 
   return (
     <div className={`reader${playerOpen ? ' reader--player-open' : ''}`}>
@@ -256,7 +277,15 @@ export function SurahView({
                 audio.surah === surah.number &&
                 audio.ayah === a.numberInSurah
               const ayahLive = playing && audio.playing
-              const words = audio.wordsByAyah?.get(a.numberInSurah)
+              const displayWords = a.text.trim().split(/\s+/).filter(Boolean)
+              const qcWords = chapterWords?.get(a.numberInSurah)
+              const activeWord = playing
+                ? mapKaraokeWordIndex(
+                    audio.activeWordIndex,
+                    qcWords?.length ?? displayWords.length,
+                    displayWords.length,
+                  )
+                : null
               const cls = [
                 'ayah',
                 hit ? 'ayah--hit' : '',
@@ -327,26 +356,24 @@ export function SurahView({
                     </div>
                   </div>
                   <p className="ayah__ar" dir="rtl" lang="ar">
-                    {playing && words && words.length > 0
-                      ? words.map((w, wi) => {
-                          const idx = wi + 1
-                          const active = audio.activeWordIndex === idx
-                          return (
-                            <span key={`${a.numberInSurah}-${idx}`}>
-                              {wi > 0 ? ' ' : null}
-                              <span
-                                className={
-                                  active
-                                    ? 'ayah__word ayah__word--active'
-                                    : 'ayah__word'
-                                }
-                              >
-                                {w}
-                              </span>
-                            </span>
-                          )
-                        })
-                      : a.text}
+                    {displayWords.map((w, wi) => {
+                      const idx = wi + 1
+                      const active = activeWord === idx
+                      return (
+                        <span key={`${a.numberInSurah}-${idx}`}>
+                          {wi > 0 ? ' ' : null}
+                          <span
+                            className={
+                              active
+                                ? 'ayah__word ayah__word--active'
+                                : 'ayah__word'
+                            }
+                          >
+                            {w}
+                          </span>
+                        </span>
+                      )
+                    })}
                   </p>
                   <p className="ayah__tr">{surah.ayahsTranslation[i]?.text}</p>
                 </article>

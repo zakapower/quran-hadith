@@ -163,7 +163,7 @@ html[data-touch='1'] .btn:hover,
 html[data-touch='1'] .btn--ghost:hover,
 html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
-html[data-touch='1'] .ayah__play:hover,
+html[data-touch='1'] .ayah__play:hover:not(.ayah__play--on):not(.ayah__play--live),
 html[data-touch='1'] .ayah--hit .ayah__copy:hover,
 html[data-touch='1'] .ayah--playing .ayah__copy:hover,
 html[data-touch='1'] .reader__nav-btn:hover,
@@ -198,6 +198,26 @@ html[data-touch='1'] .ayah--playing .ayah__copy:hover {
   color: var(--muted) !important;
 }
 
+/* Sticky :hover after tap must not wipe ayah play active chrome */
+html[data-touch='1'] .ayah__play--on:hover {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line)) !important;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface)) !important;
+}
+
+html[data-touch='1'] .ayah__play--live:hover {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line)) !important;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
+}
+
+html[data-touch='1'] .ayah--playing .ayah__play--on:hover,
+html[data-touch='1'] .ayah--playing .ayah__play--live:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line)) !important;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface)) !important;
+  color: var(--accent) !important;
+}
+
 html[data-touch='1'] .settings__reset:hover:not(:disabled) {
   background: transparent !important;
   color: var(--ink) !important;
@@ -205,7 +225,7 @@ html[data-touch='1'] .settings__reset:hover:not(:disabled) {
 
 html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
-html[data-touch='1'] .ayah__play:hover,
+html[data-touch='1'] .ayah__play:hover:not(.ayah__play--on):not(.ayah__play--live),
 html[data-touch='1'] .reader__nav-btn:hover,
 html[data-touch='1'] .quran-player__btn:hover,
 html[data-touch='1'] .quran-player__reciter-btn:hover {

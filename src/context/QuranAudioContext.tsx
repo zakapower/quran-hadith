@@ -41,6 +41,7 @@ type QuranAudioApi = {
   activeWordIndex: number | null
   progress: number
   wordsByAyah: Map<number, string[]> | null
+  wordsChapter: number | null
   openAndPlay: (opts: { surah: number; ayah?: number }) => void
   togglePause: () => void
   pause: () => void
@@ -48,6 +49,7 @@ type QuranAudioApi = {
   nextAyah: () => void
   prevAyah: () => void
   setReciter: (id: number) => void
+  ensureWords: (chapter: number) => void
   retry: () => void
 }
 
@@ -68,6 +70,18 @@ function sameAudioUrl(current: string, next: string) {
   } catch {
     return current === next || current.endsWith(next)
   }
+}
+
+function scrollAyahIntoView(ayah: number, behavior: ScrollBehavior = 'smooth') {
+  const el = document.getElementById(`a${ayah}`)
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const topPad = 96
+  const bottomPad = 120
+  const inView =
+    rect.top >= topPad && rect.bottom <= window.innerHeight - bottomPad
+  if (inView) return
+  el.scrollIntoView({ behavior, block: 'center' })
 }
 
 function loadAudioSrc(audio: HTMLAudioElement, url: string) {
@@ -110,6 +124,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const loadGenRef = useRef(0)
   const ignoreErrorRef = useRef(false)
   const finishingRef = useRef(false)
+  const syncLockRef = useRef(0)
 
   const [visible, setVisible] = useState(false)
   const [playing, setPlaying] = useState(false)
@@ -123,6 +138,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const [wordsByAyah, setWordsByAyah] = useState<Map<number, string[]> | null>(
     null,
   )
+  const [wordsChapter, setWordsChapter] = useState<number | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
@@ -183,13 +199,9 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     setActiveWordIndex(null)
     setProgress(0)
     finishingRef.current = false
+    scrollAyahIntoView(row.ayah)
 
-    requestAnimationFrame(() => {
-      document
-        .getElementById(`a${row.ayah}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    })
-
+    syncLockRef.current += 1
     ignoreErrorRef.current = true
     try {
       const needsLoad = !sameAudioUrl(audio.src, url)
@@ -239,7 +251,20 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       setError('play-failed')
     } finally {
       ignoreErrorRef.current = false
+      syncLockRef.current = Math.max(0, syncLockRef.current - 1)
     }
+  }, [])
+
+  const ensureWords = useCallback((chapter: number) => {
+    if (!Number.isFinite(chapter) || chapter < 1 || chapter > 114) return
+    void fetchChapterWords(chapter)
+      .then((words) => {
+        setWordsChapter(chapter)
+        setWordsByAyah(words)
+      })
+      .catch(() => {
+        /* ignore */
+      })
   }, [])
 
   const loadAndPlay = useCallback(
@@ -252,6 +277,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       setAyah(opts.ayah)
       targetRef.current = { surah: opts.surah, ayah: opts.ayah }
       writeLastAyah(opts.surah, opts.ayah)
+      ensureWords(opts.surah)
 
       try {
         const pack = await fetchChapterAudioPack(opts.reciter, opts.surah)
@@ -259,14 +285,6 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
 
         timestampsRef.current = pack.timestamps
         audioUrlRef.current = pack.audioUrl
-
-        void fetchChapterWords(opts.surah)
-          .then((words) => {
-            if (gen === loadGenRef.current) setWordsByAyah(words)
-          })
-          .catch(() => {
-            /* ignore */
-          })
 
         await playAyah(opts.ayah, true)
       } catch {
@@ -277,7 +295,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
         if (gen === loadGenRef.current) setLoading(false)
       }
     },
-    [playAyah],
+    [ensureWords, playAyah],
   )
 
   const openAndPlay = useCallback(
@@ -400,6 +418,8 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
     if (!audio) return
 
     const syncFromClock = () => {
+      if (syncLockRef.current > 0) return
+
       const timestamps = timestampsRef.current
       if (timestamps.length === 0) return
 
@@ -416,11 +436,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
           writeLastAyah(surahNum, row.ayah)
         }
         setAyah(row.ayah)
-        requestAnimationFrame(() => {
-          document
-            .getElementById(`a${row.ayah}`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        })
+        scrollAyahIntoView(row.ayah)
       }
 
       setActiveWordIndex(findActiveWordIndex(row.segments, tMs))
@@ -490,6 +506,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       activeWordIndex,
       progress,
       wordsByAyah,
+      wordsChapter,
       openAndPlay,
       togglePause,
       pause,
@@ -497,6 +514,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       nextAyah,
       prevAyah,
       setReciter,
+      ensureWords,
       retry,
     }),
     [
@@ -511,6 +529,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       activeWordIndex,
       progress,
       wordsByAyah,
+      wordsChapter,
       openAndPlay,
       togglePause,
       pause,
@@ -518,6 +537,7 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
       nextAyah,
       prevAyah,
       setReciter,
+      ensureWords,
       retry,
     ],
   )

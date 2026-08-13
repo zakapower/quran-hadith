@@ -50,12 +50,12 @@ export function findAyahIndexByTime(
   tMs: number,
 ): number {
   if (timestamps.length === 0) return 0
+  let lastStarted = 0
   for (let i = 0; i < timestamps.length; i++) {
     const row = timestamps[i]
     if (tMs >= row.fromMs && tMs < row.toMs) return i
+    // Gaps between ayahs: keep the last ayah that already started
+    if (tMs >= row.fromMs) lastStarted = i
   }
-  if (tMs >= timestamps[timestamps.length - 1].toMs) {
-    return timestamps.length - 1
-  }
-  return 0
+  return lastStarted
 }

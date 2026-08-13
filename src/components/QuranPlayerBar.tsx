@@ -363,6 +363,10 @@ export function QuranPlayerBar() {
                       selected ? ' is-selected' : ''
                     }`}
                     onClick={() => {
+                      const active = document.activeElement
+                      if (active instanceof HTMLElement) {
+                        active.blur()
+                      }
                       setReciter(r.id)
                       setSheetOpen(false)
                     }}
