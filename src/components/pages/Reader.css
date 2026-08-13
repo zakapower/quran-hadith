@@ -396,7 +396,6 @@
 
 .ayah--playing.ayah--live .ayah__word--active {
   color: var(--accent);
-  font-weight: 700;
 }
 
 .ayah__tr {
