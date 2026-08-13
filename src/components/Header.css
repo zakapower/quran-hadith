@@ -277,8 +277,6 @@
   .ctrl:hover {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: scale(1.04);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
 

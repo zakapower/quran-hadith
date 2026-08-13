@@ -248,22 +248,16 @@
   .ayah__copy:hover {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: translateZ(0) scale(1.03);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .ayah__play:hover {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: translateZ(0) scale(1.03);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .ayah__fav:hover {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: translateZ(0) scale(1.03);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .ayah__fav--on:hover {
@@ -499,8 +493,6 @@
   .reader__nav-btn:hover {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: scale(1.04);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 }
 

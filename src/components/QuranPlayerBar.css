@@ -370,14 +370,10 @@
   .quran-player__btn:hover:not(:disabled) {
     color: var(--ink);
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: translateZ(0) scale(1.06);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .quran-player__reciter-btn:hover:not(:disabled) {
     border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-    transform: translateZ(0) scale(1.02);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .quran-player__reciter-option:hover {

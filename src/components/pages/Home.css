@@ -103,7 +103,6 @@
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover {
-    transform: translateY(-1px);
     filter: brightness(1.05);
   }
 
