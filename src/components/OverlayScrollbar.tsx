@@ -28,6 +28,7 @@ export function OverlayScrollbar() {
     total: 0,
     thumbHeight: MIN_THUMB,
     thumbTop: ARROW,
+    track: 0,
   })
 
   useEffect(() => {
@@ -47,7 +48,18 @@ export function OverlayScrollbar() {
       thumb.style.height = `${height}px`
     }
 
+    function syncHeaderOffset() {
+      const header = document.querySelector('.site-header')
+      const headerH =
+        header instanceof HTMLElement
+          ? Math.round(header.getBoundingClientRect().height)
+          : 0
+      root.style.setProperty('--header-h', `${headerH}px`)
+      return headerH
+    }
+
     function measure() {
+      const headerH = syncHeaderOffset()
       const view = root.clientHeight
       const total = root.scrollHeight
       const canScroll = total > view + 1
@@ -61,7 +73,9 @@ export function OverlayScrollbar() {
         return
       }
 
-      const track = Math.max(0, view - ARROW * 2)
+      const railH =
+        railRef.current?.clientHeight || Math.max(0, view - headerH)
+      const track = Math.max(0, railH - ARROW * 2)
       const ratio = view / total
       const rawHeight = Math.max(MIN_THUMB, Math.round(track * ratio))
       // Hysteresis: ignore 1–2px thumb height flicker from layout noise.
@@ -74,6 +88,7 @@ export function OverlayScrollbar() {
           ? ARROW
           : ARROW + Math.round((root.scrollTop / (total - view)) * maxTop)
 
+      metrics.current.track = track
       metrics.current.thumbHeight = height
       metrics.current.thumbTop = Math.min(ARROW + maxTop, Math.max(ARROW, top))
       applyThumb(metrics.current.thumbTop, height)
@@ -147,10 +162,8 @@ export function OverlayScrollbar() {
 
     function onMove(e: PointerEvent) {
       if (!drag.current) return
-      const { view, total } = metrics.current
-      const height = metrics.current.thumbHeight
-      const track = Math.max(0, view - ARROW * 2)
-      const maxTop = Math.max(0, track - height)
+      const { view, total, thumbHeight, track } = metrics.current
+      const maxTop = Math.max(0, track - thumbHeight)
       const nextTop = Math.min(
         ARROW + maxTop,
         Math.max(
