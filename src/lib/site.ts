@@ -1,5 +1,12 @@
 import type { Metadata } from 'next'
 
+export const SITE_NAME = 'Tilāwah'
+
+/** Browser tab: home is just the brand; other pages `Tilāwah - вкладка`. */
+export function pageTitle(tab?: string) {
+  return tab ? `${SITE_NAME} - ${tab}` : SITE_NAME
+}
+
 export function getSiteOrigin(): string {
   return (process.env.SITE_ORIGIN || 'https://example.com').replace(/\/$/, '')
 }

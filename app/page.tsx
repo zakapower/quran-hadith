@@ -1,18 +1,18 @@
 import type { Metadata } from 'next'
 import { HomeView } from '@/components/pages/HomeView'
 import { getSurahList } from '@/data/surahList'
-import { clipDescription, pageAlternates, pageAlternatesMetadataBase } from '@/lib/site'
+import { clipDescription, pageAlternates, pageAlternatesMetadataBase, pageTitle } from '@/lib/site'
 
 export const dynamic = 'force-static'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Tilāwah – Коран и хадисы / Qur’an and Hadith'
+  const title = pageTitle()
   const description =
     'Tilāwah – минималистичное чтение Корана и хадисов. Minimal Qur’an and Hadith reading.'
 
   return {
     metadataBase: pageAlternatesMetadataBase('/'),
-    title,
+    title: { absolute: title },
     description: clipDescription(description),
     alternates: pageAlternates('/'),
     openGraph: { title, description: clipDescription(description) },

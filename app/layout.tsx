@@ -8,7 +8,7 @@ import { OverlayScrollbar } from '@/components/OverlayScrollbar'
 import { QuranPlayerBar } from '@/components/QuranPlayerBar'
 import { ScrollToTop } from '@/components/ScrollToTop'
 import { getRequestLang } from '@/lib/request-lang'
-import { getSiteOrigin } from '@/lib/site'
+import { getSiteOrigin, SITE_NAME } from '@/lib/site'
 import './globals.css'
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -28,7 +28,11 @@ const literata = Literata({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
-  applicationName: 'Tilāwah',
+  applicationName: SITE_NAME,
+  title: {
+    default: SITE_NAME,
+    template: `${SITE_NAME} - %s`,
+  },
   appleWebApp: {
     capable: true,
     title: 'Tilāwah',

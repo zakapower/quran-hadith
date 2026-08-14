@@ -40,25 +40,25 @@
 .hero__brand {
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 10vw, 4.6rem);
+  font-size: clamp(2.6rem, 9vw, 4.5rem);
   font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 0.95;
 }
 
 .hero h1 {
-  margin: 0 0 0.85rem;
-  max-width: 18ch;
+  margin: 0 0 0.75rem;
   font-family: var(--font-display);
-  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-size: clamp(1.25rem, 2.8vw, 1.65rem);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.25;
+  text-wrap: balance;
 }
 
 .hero__lead {
-  margin: 0 0 1.6rem;
-  max-width: 32rem;
+  margin: 0 0 1.5rem;
+  max-width: 34rem;
   color: var(--muted);
   font-size: 1.05rem;
   line-height: 1.55;
@@ -123,11 +123,27 @@
   margin-bottom: 0.25rem;
 }
 
-.home-surahs__head h2 {
-  margin: 0 0 0.4rem;
+.home-surahs__title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.home-surahs__title-row h2 {
+  margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 3.5vw, 1.9rem);
   letter-spacing: -0.03em;
+}
+
+.home-surahs__title-row a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 .home-surahs__head p {
@@ -141,8 +157,8 @@
   margin-top: 1.5rem;
 }
 
-.home-surahs .card-list--cols {
-  margin-top: 1.25rem;
+.home-surahs .card-list {
+  margin-top: 1rem;
 }
 
 @media (min-width: 640px) {
@@ -209,5 +225,9 @@
   .home-surahs {
     padding: 1.75rem max(0.9rem, env(safe-area-inset-right, 0px))
       3rem max(0.9rem, env(safe-area-inset-left, 0px));
+  }
+
+  .home-surahs__title-row h2 {
+    font-size: clamp(1.35rem, 6vw, 1.7rem);
   }
 }

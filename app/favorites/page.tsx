@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import { FavoritesView } from '@/components/pages/FavoritesView'
-import { clipDescription, pageAlternates } from '@/lib/site'
+import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
 export const dynamic = 'force-static'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Избранное / Favorites – Tilāwah'
+  const title = 'Избранное / Favorites'
   const description =
     'Сохранённые аяты Корана и хадисы. Saved Qur’an ayahs and hadith.'
 
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description: clipDescription(description),
     alternates: pageAlternates('/favorites'),
-    openGraph: { title, description: clipDescription(description) },
+    openGraph: { title: pageTitle(title), description: clipDescription(description) },
   }
 }
 

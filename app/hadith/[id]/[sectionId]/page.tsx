@@ -6,7 +6,7 @@ import {
   fetchHadithSections,
 } from '@/api/hadith'
 import { getHadithCollection, hadithCollections } from '@/data/hadithCatalog'
-import { clipDescription, pageAlternates } from '@/lib/site'
+import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
 /** First visit builds HTML; then cached (ISR). Avoids huge Vercel builds. */
 export const revalidate = 86400
@@ -35,16 +35,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id, sectionId } = await params
   const book = getHadithCollection(id)
-  const title = book
-    ? `${book.title.ru} / ${book.title.en} – Tilāwah`
-    : 'Hadith – Tilāwah'
+  const title = book ? `${book.title.ru} / ${book.title.en}` : 'Hadith'
   const description = 'Чтение главы хадисов. Read a hadith chapter.'
 
   return {
     title,
     description: clipDescription(description),
     alternates: pageAlternates(`/hadith/${id}/${sectionId}`),
-    openGraph: { title, description: clipDescription(description) },
+    openGraph: { title: pageTitle(title), description: clipDescription(description) },
   }
 }
 

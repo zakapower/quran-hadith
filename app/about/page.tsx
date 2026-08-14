@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import { AboutView } from '@/components/pages/AboutView'
-import { clipDescription, pageAlternates } from '@/lib/site'
+import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
 export const dynamic = 'force-static'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'О проекте / About – Tilāwah'
+  const title = 'О проекте / About'
   const description =
     'О проекте Tilāwah: Коран, хадисы, озвучка и избранное. About Tilāwah.'
 
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description: clipDescription(description),
     alternates: pageAlternates('/about'),
-    openGraph: { title, description: clipDescription(description) },
+    openGraph: { title: pageTitle(title), description: clipDescription(description) },
   }
 }
 

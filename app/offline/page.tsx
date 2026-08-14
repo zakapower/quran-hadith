@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { pageTitle } from '@/lib/site'
 
 export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
   title: 'Нет сети / Offline',
   robots: { index: false, follow: false },
+  openGraph: { title: pageTitle('Нет сети / Offline') },
 }
 
 export default function OfflinePage() {

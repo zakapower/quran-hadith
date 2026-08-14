@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { SurahView } from '@/components/pages/SurahView'
 import { fetchSurah } from '@/api/quran'
-import { clipDescription, pageAlternates } from '@/lib/site'
+import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 import { surahTitleRu } from '@/data/surahNamesRu'
 import { getSurahMeta } from '@/data/surahList'
 
@@ -22,8 +22,8 @@ export async function generateMetadata({
   const valid = Number.isFinite(n) && n >= 1 && n <= 114
   const meta = valid ? getSurahMeta(n) : null
   const title = valid
-    ? `${n}. ${surahTitleRu(n, meta?.englishName ?? '')} / ${meta?.englishName ?? n} – Tilāwah`
-    : 'Surah – Tilāwah'
+    ? `${n}. ${surahTitleRu(n, meta?.englishName ?? '')} / ${meta?.englishName ?? n}`
+    : 'Surah'
   const description =
     'Чтение суры Корана с арабским текстом и переводом. Read a Qur’an surah with Arabic text and translation.'
 
@@ -31,7 +31,7 @@ export async function generateMetadata({
     title,
     description: clipDescription(description),
     alternates: pageAlternates(`/quran/${number}`),
-    openGraph: { title, description: clipDescription(description) },
+    openGraph: { title: pageTitle(title), description: clipDescription(description) },
   }
 }
 

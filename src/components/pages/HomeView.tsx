@@ -21,7 +21,9 @@ export function HomeView({ surahs }: { surahs: SurahMeta[] }) {
         <div className="hero__inner">
           <p className="hero__brand">Tilāwah</p>
           <h1>
-            {t('Коран и хадисы – простое чтение', 'Qur’an and Hadith – simple reading')}
+            {t('Коран и хадисы', 'Qur’an and Hadith')}
+            <br />
+            {t('простое чтение', 'simple reading')}
           </h1>
           <p className="hero__lead">
             {t(
@@ -42,7 +44,10 @@ export function HomeView({ surahs }: { surahs: SurahMeta[] }) {
 
       <section className="home-surahs" aria-labelledby="home-surahs-title">
         <header className="home-surahs__head">
-          <h2 id="home-surahs-title">{t('Суры', 'Surahs')}</h2>
+          <div className="home-surahs__title-row">
+            <h2 id="home-surahs-title">{t('Суры', 'Surahs')}</h2>
+            <Link href="/quran">{t('Все →', 'All →')}</Link>
+          </div>
           <p>
             {t(
               'Все 114 сур. Выбери и читай.',

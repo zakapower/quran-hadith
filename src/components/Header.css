@@ -92,7 +92,7 @@
   flex-shrink: 0;
 }
 
-.site-controls__burger {
+.ctrl.site-controls__burger {
   display: none;
 }
 
@@ -335,7 +335,7 @@
     justify-self: auto;
   }
 
-  .site-controls__burger {
+  .ctrl.site-controls__burger {
     display: inline-flex;
   }
 
