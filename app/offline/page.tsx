@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getRequestLang } from '@/lib/request-lang'
 import { pageTitle } from '@/lib/site'
 
-export const dynamic = 'force-static'
-
-export const metadata: Metadata = {
-  title: 'Нет сети / Offline',
-  robots: { index: false, follow: false },
-  openGraph: { title: pageTitle('Нет сети / Offline') },
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getRequestLang()
+  const tab = lang === 'ru' ? 'Нет сети' : 'Offline'
+  return {
+    title: tab,
+    robots: { index: false, follow: false },
+    openGraph: { title: pageTitle(tab) },
+  }
 }
 
 export default function OfflinePage() {

@@ -1,20 +1,23 @@
 import type { Metadata } from 'next'
 import { QuranListView } from '@/components/pages/QuranListView'
 import { getSurahList } from '@/data/surahList'
+import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
-export const dynamic = 'force-static'
-
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Коран / Qur’an'
+  const lang = await getRequestLang()
+  const tab = lang === 'ru' ? 'Коран' : 'Qur’an'
+  const title = pageTitle(tab)
   const description =
-    'Список сур Корана. Чтение с арабским текстом и переводом. Qur’an surah list.'
+    lang === 'ru'
+      ? 'Список сур Корана. Чтение с арабским текстом и переводом.'
+      : 'Qur’an surah list. Read with Arabic text and translation.'
 
   return {
-    title,
+    title: tab,
     description: clipDescription(description),
     alternates: pageAlternates('/quran'),
-    openGraph: { title: pageTitle(title), description: clipDescription(description) },
+    openGraph: { title, description: clipDescription(description) },
   }
 }
 

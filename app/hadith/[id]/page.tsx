@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 import { HadithBookView } from '@/components/pages/HadithBookView'
 import { fetchHadithSections } from '@/api/hadith'
 import { getHadithCollection, hadithCollections } from '@/data/hadithCatalog'
+import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
-
-export const dynamic = 'force-static'
 
 export function generateStaticParams() {
   return hadithCollections.map((b) => ({ id: b.id }))
@@ -16,17 +15,25 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
+  const lang = await getRequestLang()
   const book = getHadithCollection(id)
-  const title = book ? `${book.title.ru} / ${book.title.en}` : 'Hadith'
+  const tab = book
+    ? book.title[lang]
+    : lang === 'ru'
+      ? 'Хадисы'
+      : 'Hadith'
+  const title = pageTitle(tab)
   const description = book
-    ? `${book.narrator.ru}. ${book.narrator.en}.`
-    : 'Hadith collection.'
+    ? book.narrator[lang]
+    : lang === 'ru'
+      ? 'Сборник хадисов.'
+      : 'Hadith collection.'
 
   return {
-    title,
+    title: tab,
     description: clipDescription(description),
     alternates: pageAlternates(`/hadith/${id}`),
-    openGraph: { title: pageTitle(title), description: clipDescription(description) },
+    openGraph: { title, description: clipDescription(description) },
   }
 }
 

@@ -1,19 +1,22 @@
 import type { Metadata } from 'next'
 import { HadithListView } from '@/components/pages/HadithListView'
+import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
-export const dynamic = 'force-static'
-
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Хадисы / Hadith'
+  const lang = await getRequestLang()
+  const tab = lang === 'ru' ? 'Хадисы' : 'Hadith'
+  const title = pageTitle(tab)
   const description =
-    'Сахих аль-Бухари и Сахих Муслим. Sahih al-Bukhari and Sahih Muslim.'
+    lang === 'ru'
+      ? 'Сахих аль-Бухари и Сахих Муслим.'
+      : 'Sahih al-Bukhari and Sahih Muslim.'
 
   return {
-    title,
+    title: tab,
     description: clipDescription(description),
     alternates: pageAlternates('/hadith'),
-    openGraph: { title: pageTitle(title), description: clipDescription(description) },
+    openGraph: { title, description: clipDescription(description) },
   }
 }
 

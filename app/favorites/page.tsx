@@ -1,19 +1,22 @@
 import type { Metadata } from 'next'
 import { FavoritesView } from '@/components/pages/FavoritesView'
+import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
-export const dynamic = 'force-static'
-
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Избранное / Favorites'
+  const lang = await getRequestLang()
+  const tab = lang === 'ru' ? 'Избранное' : 'Favorites'
+  const title = pageTitle(tab)
   const description =
-    'Сохранённые аяты Корана и хадисы. Saved Qur’an ayahs and hadith.'
+    lang === 'ru'
+      ? 'Сохранённые аяты Корана и хадисы.'
+      : 'Saved Qur’an ayahs and hadith.'
 
   return {
-    title,
+    title: tab,
     description: clipDescription(description),
     alternates: pageAlternates('/favorites'),
-    openGraph: { title: pageTitle(title), description: clipDescription(description) },
+    openGraph: { title, description: clipDescription(description) },
   }
 }
 

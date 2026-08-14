@@ -2,11 +2,10 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { SurahView } from '@/components/pages/SurahView'
 import { fetchSurah } from '@/api/quran'
+import { getRequestLang } from '@/lib/request-lang'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 import { surahTitleRu } from '@/data/surahNamesRu'
 import { getSurahMeta } from '@/data/surahList'
-
-export const dynamic = 'force-static'
 
 export function generateStaticParams() {
   return Array.from({ length: 114 }, (_, i) => ({ number: String(i + 1) }))
@@ -18,20 +17,28 @@ export async function generateMetadata({
   params: Promise<{ number: string }>
 }): Promise<Metadata> {
   const { number } = await params
+  const lang = await getRequestLang()
   const n = Number(number)
   const valid = Number.isFinite(n) && n >= 1 && n <= 114
   const meta = valid ? getSurahMeta(n) : null
-  const title = valid
-    ? `${n}. ${surahTitleRu(n, meta?.englishName ?? '')} / ${meta?.englishName ?? n}`
-    : 'Surah'
+  const tab = valid
+    ? lang === 'ru'
+      ? `${n}. ${surahTitleRu(n, meta?.englishName ?? '')}`
+      : `${n}. ${meta?.englishName ?? n}`
+    : lang === 'ru'
+      ? 'Сура'
+      : 'Surah'
+  const title = pageTitle(tab)
   const description =
-    'Чтение суры Корана с арабским текстом и переводом. Read a Qur’an surah with Arabic text and translation.'
+    lang === 'ru'
+      ? 'Чтение суры Корана с арабским текстом и переводом.'
+      : 'Read a Qur’an surah with Arabic text and translation.'
 
   return {
-    title,
+    title: tab,
     description: clipDescription(description),
     alternates: pageAlternates(`/quran/${number}`),
-    openGraph: { title: pageTitle(title), description: clipDescription(description) },
+    openGraph: { title, description: clipDescription(description) },
   }
 }
 

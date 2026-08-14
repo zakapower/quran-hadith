@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { pageTitle } from '@/lib/site'
+import { getRequestLang } from '@/lib/request-lang'
 
-export const metadata: Metadata = {
-  title: 'Не найдено / Not found',
-  openGraph: { title: pageTitle('Не найдено / Not found') },
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getRequestLang()
+  return {
+    title: lang === 'ru' ? 'Не найдено' : 'Not found',
+  }
 }
 
 export default function NotFound() {
