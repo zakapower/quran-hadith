@@ -57,6 +57,10 @@ html {
   background-color: var(--bg);
 }
 
+html.menu-open {
+  overflow: hidden;
+}
+
 html[data-theme='dark'] {
   color-scheme: dark;
 }

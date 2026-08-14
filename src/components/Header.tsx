@@ -1,9 +1,10 @@
 'use client'
 
+import { useEffect, useId, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { SiGithub } from '@icons-pack/react-simple-icons'
-import { BookOpen, Bookmark, Moon, Sun } from 'lucide-react'
+import { BookOpen, Bookmark, Menu, Moon, Sun, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { SettingsPopover } from './SettingsPopover'
 import './Header.css'
@@ -13,6 +14,8 @@ const GITHUB_URL = 'https://github.com/zakapower'
 export function Header() {
   const { lang, theme, themeReady, toggleLang, toggleTheme, t } = useApp()
   const pathname = usePathname()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuId = useId()
 
   function navClass(href: string, end = false) {
     const active = end
@@ -24,8 +27,81 @@ export function Header() {
   const favoritesActive =
     pathname === '/favorites' || pathname.startsWith('/favorites/')
 
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    document.documentElement.classList.add('menu-open')
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.documentElement.classList.remove('menu-open')
+    }
+  }, [menuOpen])
+
+  const toolControls = (
+    <>
+      <Link
+        href="/favorites"
+        className={`ctrl${favoritesActive ? ' ctrl--active' : ''}`}
+        aria-label={t('Избранное', 'Favorites')}
+        title={t('Избранное', 'Favorites')}
+        onClick={() => setMenuOpen(false)}
+      >
+        <Bookmark className="ctrl__icon" strokeWidth={2} aria-hidden />
+      </Link>
+      <a
+        className="ctrl"
+        href={GITHUB_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t('GitHub', 'GitHub')}
+      >
+        <SiGithub
+          className="ctrl__icon"
+          color="currentColor"
+          size={18}
+          title=""
+          aria-hidden
+        />
+      </a>
+      <button
+        type="button"
+        className={`ctrl${lang === 'en' ? ' ctrl--lang-en' : ''}`}
+        onClick={toggleLang}
+        aria-label={t('Switch to English', 'Переключить на русский')}
+      >
+        <span className="ctrl__stack" aria-hidden>
+          <span className="ctrl__face ctrl__face--en">EN</span>
+          <span className="ctrl__face ctrl__face--ru">RU</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        className={`ctrl${theme === 'dark' ? ' ctrl--theme-dark' : ''}${themeReady ? '' : ' ctrl--theme-boot'}`}
+        onClick={toggleTheme}
+        aria-label={
+          theme === 'light'
+            ? t('Тёмная тема', 'Dark theme')
+            : t('Светлая тема', 'Light theme')
+        }
+      >
+        <span className="ctrl__stack" aria-hidden>
+          <Moon className="ctrl__face ctrl__face--moon" strokeWidth={2} />
+          <Sun className="ctrl__face ctrl__face--sun" strokeWidth={2} />
+        </span>
+      </button>
+      <SettingsPopover />
+    </>
+  )
+
   return (
-    <header className="site-header">
+    <header className={`site-header${menuOpen ? ' site-header--menu-open' : ''}`}>
       <div className="site-header__inner">
         <div className="site-header__bar">
           <Link href="/" className="brand" aria-label="Tilāwah home">
@@ -49,60 +125,97 @@ export function Header() {
           </nav>
 
           <div className="site-controls">
-            <Link
-              href="/favorites"
-              className={`ctrl${favoritesActive ? ' ctrl--active' : ''}`}
-              aria-label={t('Избранное', 'Favorites')}
-              title={t('Избранное', 'Favorites')}
-            >
-              <Bookmark className="ctrl__icon" strokeWidth={2} aria-hidden />
-            </Link>
-
-            <a
-              className="ctrl"
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t('GitHub', 'GitHub')}
-            >
-              <SiGithub
-                className="ctrl__icon"
-                color="currentColor"
-                size={18}
-                title=""
-                aria-hidden
-              />
-            </a>
             <button
               type="button"
-              className={`ctrl${lang === 'en' ? ' ctrl--lang-en' : ''}`}
-              onClick={toggleLang}
-              aria-label={t('Switch to English', 'Переключить на русский')}
-            >
-              <span className="ctrl__stack" aria-hidden>
-                <span className="ctrl__face ctrl__face--en">EN</span>
-                <span className="ctrl__face ctrl__face--ru">RU</span>
-              </span>
-            </button>
-            <button
-              type="button"
-              className={`ctrl${theme === 'dark' ? ' ctrl--theme-dark' : ''}${themeReady ? '' : ' ctrl--theme-boot'}`}
-              onClick={toggleTheme}
+              className={`ctrl site-controls__burger${menuOpen ? ' ctrl--menu-open' : ''}`}
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-expanded={menuOpen}
+              aria-controls={menuId}
               aria-label={
-                theme === 'light'
-                  ? t('Тёмная тема', 'Dark theme')
-                  : t('Светлая тема', 'Light theme')
+                menuOpen
+                  ? t('Закрыть меню', 'Close menu')
+                  : t('Открыть меню', 'Open menu')
               }
             >
               <span className="ctrl__stack" aria-hidden>
-                <Moon className="ctrl__face ctrl__face--moon" strokeWidth={2} />
-                <Sun className="ctrl__face ctrl__face--sun" strokeWidth={2} />
+                <Menu className="ctrl__face ctrl__face--menu" strokeWidth={2} />
+                <X className="ctrl__face ctrl__face--close" strokeWidth={2.35} />
               </span>
             </button>
-            <SettingsPopover />
+            <div className="site-controls__tools">{toolControls}</div>
           </div>
+
+          {menuOpen && (
+            <div
+              className="site-menu"
+              id={menuId}
+              aria-label={t('Действия', 'Actions')}
+            >
+              <div className="site-menu__actions">
+                <Link
+                  href="/favorites"
+                  className={`site-menu__action${favoritesActive ? ' is-active' : ''}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Bookmark
+                    className="site-menu__action-icon"
+                    strokeWidth={2}
+                    aria-hidden
+                  />
+                  <span>{t('Избранное', 'Favorites')}</span>
+                </Link>
+                <button type="button" className="site-menu__action" onClick={toggleLang}>
+                  <span className="site-menu__action-badge" aria-hidden>
+                    {lang === 'ru' ? 'EN' : 'RU'}
+                  </span>
+                  <span>
+                    {lang === 'ru'
+                      ? t('English', 'English')
+                      : t('Русский', 'Russian')}
+                  </span>
+                </button>
+                <button type="button" className="site-menu__action" onClick={toggleTheme}>
+                  {theme === 'light' ? (
+                    <Moon className="site-menu__action-icon" strokeWidth={2} aria-hidden />
+                  ) : (
+                    <Sun className="site-menu__action-icon" strokeWidth={2} aria-hidden />
+                  )}
+                  <span>
+                    {theme === 'light'
+                      ? t('Тёмная тема', 'Dark theme')
+                      : t('Светлая тема', 'Light theme')}
+                  </span>
+                </button>
+                <a
+                  className="site-menu__action"
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <SiGithub
+                    className="site-menu__action-icon"
+                    color="currentColor"
+                    size={18}
+                    title=""
+                    aria-hidden
+                  />
+                  <span>GitHub</span>
+                </a>
+                <SettingsPopover variant="menu" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {menuOpen && (
+        <button
+          type="button"
+          className="site-menu__backdrop"
+          aria-label={t('Закрыть меню', 'Close menu')}
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
     </header>
   )
 }
