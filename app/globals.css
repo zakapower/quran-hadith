@@ -3,6 +3,7 @@
   --font-display: var(--font-display-face), Georgia, serif;
   --font-arabic: 'UthmanicHafs', 'KFGQPC Uthmanic Script HAFS', serif;
   --max: 45rem;
+  --gutter: 0.65rem;
   --reader-ar-scale: 1;
   --reader-tr-scale: 1;
   /* Высота бара + воздух над ним — одинаковый визуальный зазор на всех ширинах */

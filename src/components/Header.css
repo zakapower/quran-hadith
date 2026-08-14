@@ -11,7 +11,7 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0.85rem clamp(1.25rem, 3vw, 2rem);
+  padding: 0.75rem var(--gutter);
 }
 
 .site-header__bar {
@@ -309,8 +309,8 @@
     column-gap: 0.55rem;
     row-gap: 0.7rem;
     z-index: 46;
-    padding: 0.85rem max(1rem, env(safe-area-inset-right, 0px)) 0
-      max(1rem, env(safe-area-inset-left, 0px));
+    padding: 0.75rem max(var(--gutter), env(safe-area-inset-right, 0px)) 0
+      max(var(--gutter), env(safe-area-inset-left, 0px));
   }
 
   .brand {
@@ -407,9 +407,9 @@
     display: block;
     order: 4;
     position: absolute;
-    top: calc(0.85rem + 2.5rem + 0.7rem);
-    left: max(0.55rem, env(safe-area-inset-left, 0px));
-    right: max(0.55rem, env(safe-area-inset-right, 0px));
+    top: calc(0.75rem + 2.5rem + 0.7rem);
+    left: max(var(--gutter), env(safe-area-inset-left, 0px));
+    right: max(var(--gutter), env(safe-area-inset-right, 0px));
     z-index: 49;
     margin: 0;
     padding: 0.45rem;
