@@ -139,7 +139,7 @@ export function Header() {
             >
               <span className="ctrl__stack" aria-hidden>
                 <Menu className="ctrl__face ctrl__face--menu" strokeWidth={2} />
-                <X className="ctrl__face ctrl__face--close" strokeWidth={2.35} />
+                <X className="ctrl__face ctrl__face--close" strokeWidth={2} />
               </span>
             </button>
             <div className="site-controls__tools">{toolControls}</div>

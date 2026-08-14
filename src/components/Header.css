@@ -147,7 +147,9 @@
 }
 
 .ctrl__face--moon,
-.ctrl__face--sun {
+.ctrl__face--sun,
+.ctrl__face--menu,
+.ctrl__face--close {
   width: 1.15rem;
   height: 1.15rem;
 }
