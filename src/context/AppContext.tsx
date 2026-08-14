@@ -25,6 +25,7 @@ export const FONT_SCALE_DEFAULT = 1
 interface AppState {
   lang: Lang
   theme: Theme
+  themeReady: boolean
   fontAr: number
   fontTr: number
   reduceMotion: boolean
@@ -176,6 +177,7 @@ export function AppProvider({
     () => ({
       lang,
       theme,
+      themeReady,
       fontAr,
       fontTr,
       reduceMotion,
@@ -200,7 +202,7 @@ export function AppProvider({
       toggleTheme: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')),
       t: (ru, en) => (lang === 'ru' ? ru : en),
     }),
-    [lang, theme, fontAr, fontTr, reduceMotion, router],
+    [lang, theme, themeReady, fontAr, fontTr, reduceMotion, router],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
