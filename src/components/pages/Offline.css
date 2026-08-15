@@ -1,0 +1,135 @@
+.offline {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+  animation: in 0.45s ease both;
+}
+
+.offline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 2.5rem 0 0;
+  padding: 2.25rem 1.35rem 1.75rem;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 0.85rem;
+  line-height: 1.5;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.offline-empty__icon {
+  width: 1.85rem;
+  height: 1.85rem;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.offline-empty h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.2vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.offline-empty__lead {
+  margin: 0;
+  max-width: 28rem;
+  font-size: 0.98rem;
+}
+
+.offline-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+  margin-top: 0.65rem;
+}
+
+.offline-empty__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.05rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.offline-empty__btn--ghost {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.offline-empty__btn:active {
+  transform: translateY(1px);
+  filter: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .offline-empty__btn:hover {
+    filter: brightness(1.05);
+  }
+
+  .offline-empty__btn--ghost:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+    color: var(--accent);
+    filter: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .offline-empty {
+    margin-top: 1.5rem;
+    padding: 1.75rem 1rem 1.4rem;
+  }
+
+  .offline-empty__actions {
+    width: 100%;
+  }
+
+  .offline-empty__btn {
+    flex: 1 1 calc(50% - 0.55rem);
+    justify-content: center;
+  }
+
+  .offline-empty__btn:first-child {
+    flex: 1 1 100%;
+  }
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offline {
+    animation: none;
+  }
+
+  .offline-empty__btn {
+    transition: none;
+  }
+}
