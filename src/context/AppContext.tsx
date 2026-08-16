@@ -150,6 +150,12 @@ export function AppProvider({
       /* ignore */
     }
     applySiteFavicon(theme)
+    if (!document.documentElement.classList.contains('theme-changing')) return
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('theme-changing')
+      })
+    })
   }, [theme, themeReady])
 
   useEffect(() => {
@@ -199,7 +205,10 @@ export function AppProvider({
         setLangState(next)
         router.refresh()
       },
-      toggleTheme: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')),
+      toggleTheme: () => {
+        document.documentElement.classList.add('theme-changing')
+        setTheme((t) => (t === 'light' ? 'dark' : 'light'))
+      },
       t: (ru, en) => (lang === 'ru' ? ru : en),
     }),
     [lang, theme, themeReady, fontAr, fontTr, reduceMotion, router],

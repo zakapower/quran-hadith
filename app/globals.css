@@ -257,3 +257,10 @@ html[data-reduce-motion='1'] *::after {
   transition: none !important;
   scroll-behavior: auto !important;
 }
+
+/* Мгновенная смена палитры; анимация иконок (.ctrl__face) остаётся */
+html.theme-changing *:not(.ctrl__face),
+html.theme-changing *:not(.ctrl__face)::before,
+html.theme-changing *:not(.ctrl__face)::after {
+  transition: none !important;
+}
