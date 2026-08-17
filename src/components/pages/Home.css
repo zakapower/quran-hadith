@@ -4,7 +4,11 @@
 
 .hero {
   position: relative;
-  padding: 3.5rem 1.25rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26rem;
+  padding: 3rem 1.25rem;
   overflow: hidden;
   text-align: center;
   border-bottom: 1px solid var(--line);
@@ -29,6 +33,7 @@
 
 .hero__inner {
   position: relative;
+  width: 100%;
   max-width: var(--max);
   margin: 0 auto;
   z-index: 1;
@@ -201,8 +206,9 @@
 
 @media (max-width: 720px) {
   .hero {
-    padding: 2.75rem max(1rem, env(safe-area-inset-right, 0px))
-      3.25rem max(1rem, env(safe-area-inset-left, 0px));
+    min-height: 24rem;
+    padding: 2.5rem max(1rem, env(safe-area-inset-right, 0px))
+      2.5rem max(1rem, env(safe-area-inset-left, 0px));
   }
 
   .hero__lead {
