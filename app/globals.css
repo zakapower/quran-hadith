@@ -85,8 +85,8 @@ body {
   color: var(--ink);
   background:
     radial-gradient(
-      80% 50% at 50% 0%,
-      color-mix(in srgb, var(--wash) 65%, transparent),
+      80% 50% at 100% 0%,
+      color-mix(in srgb, var(--wash) 70%, transparent),
       transparent 60%
     ),
     var(--bg);
@@ -229,14 +229,8 @@ html[data-touch='1'] .ctrl:hover,
 html[data-touch='1'] .ayah__copy:hover,
 html[data-touch='1'] .ayah__play:hover:not(.ayah__play--on):not(.ayah__play--live),
 html[data-touch='1'] .reader__nav-btn:hover,
-html[data-touch='1'] .quran-player__btn:hover,
-html[data-touch='1'] .quran-player__reciter-btn:hover {
+html[data-touch='1'] .quran-player__btn:hover {
   color: var(--muted) !important;
-}
-
-html[data-touch='1'] .quran-player__reciter-btn:hover {
-  background: var(--bg) !important;
-  color: var(--ink) !important;
 }
 
 /* User toggle or OS preference: CSS motion only */
