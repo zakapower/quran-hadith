@@ -131,7 +131,6 @@
     color 0.22s ease,
     border-color 0.22s ease,
     background-color 0.22s ease,
-    transform 0.22s ease,
     box-shadow 0.22s ease;
 }
 
@@ -144,12 +143,6 @@
 .quran-player__btn:disabled {
   opacity: 0.55;
   cursor: default;
-}
-
-.quran-player__btn:active:not(:disabled) {
-  transform: translateZ(0) scale(0.94);
-  box-shadow: none;
-  transition-duration: 0.1s;
 }
 
 .quran-player__icon-swap {
@@ -202,7 +195,7 @@
   padding: 0.35rem 0.55rem;
   border: 1px solid var(--line);
   border-radius: 0.4rem;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
   font-size: 0.78rem;
@@ -213,7 +206,6 @@
     color 0.22s ease,
     border-color 0.22s ease,
     background-color 0.22s ease,
-    transform 0.22s ease,
     box-shadow 0.22s ease;
 }
 
@@ -226,10 +218,6 @@
 .quran-player__reciter-btn:disabled {
   opacity: 0.55;
   cursor: default;
-}
-
-.quran-player__reciter-btn:active:not(:disabled) {
-  transform: translateZ(0) scale(0.97);
 }
 
 .quran-player__reciter-name {
@@ -307,18 +295,13 @@
   transition:
     background-color 0.18s ease,
     border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.18s ease;
+    color 0.18s ease;
 }
 
 .quran-player__reciter-option.is-selected {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
   border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
-}
-
-.quran-player__reciter-option:active {
-  transform: scale(0.98);
 }
 
 .quran-player__reciter-check {
@@ -530,7 +513,7 @@
     border-bottom: none;
     background: var(--surface);
     color: var(--ink);
-    box-shadow: 0 -12px 40px color-mix(in srgb, var(--ink) 18%, transparent);
+    box-shadow: none;
     animation: quran-player-sheet-in 0.22s ease both;
   }
 

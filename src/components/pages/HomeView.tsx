@@ -19,17 +19,9 @@ export function HomeView({ surahs }: { surahs: SurahMeta[] }) {
       <section className="hero">
         <div className="hero__bg" aria-hidden="true" />
         <div className="hero__inner">
-          <p className="hero__brand">Tilāwah</p>
-          <h1>
-            {t('Коран и хадисы', 'Qur’an and Hadith')}
-            <br />
-            {t('простое чтение', 'simple reading')}
-          </h1>
+          <h1 className="hero__brand">Tilāwah</h1>
           <p className="hero__lead">
-            {t(
-              'Читай арабский текст и перевод. Русский или English. Светлая или тёмная тема.',
-              'Read Arabic text and translation. Russian or English. Light or dark theme.',
-            )}
+            {t('Коран и хадисы. Простое чтение.', 'Qur’an and Hadith. Simple reading.')}
           </p>
           <div className="hero__actions">
             <Link className="btn" href="/quran">
@@ -46,7 +38,9 @@ export function HomeView({ surahs }: { surahs: SurahMeta[] }) {
         <header className="home-surahs__head">
           <div className="home-surahs__title-row">
             <h2 id="home-surahs-title">{t('Суры', 'Surahs')}</h2>
-            <Link href="/quran">{t('Все →', 'All →')}</Link>
+            <Link className="btn btn--ghost home-surahs__all" href="/quran">
+              {t('Все →', 'All →')}
+            </Link>
           </div>
           <p>
             {t(

@@ -142,7 +142,10 @@ export function QuranAudioProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    setReciterIdState(readReciterId(DEFAULT_RECITER_ID))
+    const saved = readReciterId(DEFAULT_RECITER_ID)
+    const reciter = getReciter(saved)
+    setReciterIdState(reciter.id)
+    if (reciter.id !== saved) writeReciterId(reciter.id)
     setHydrated(true)
   }, [])
 

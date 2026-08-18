@@ -20,7 +20,11 @@ export const RECITERS: Reciter[] = [
 export const DEFAULT_RECITER_ID = 7
 
 export function getReciter(id: number): Reciter {
-  return RECITERS.find((r) => r.id === id) ?? RECITERS[0]
+  return (
+    RECITERS.find((r) => r.id === id) ??
+    RECITERS.find((r) => r.id === DEFAULT_RECITER_ID) ??
+    RECITERS[0]
+  )
 }
 
 /** Same-origin chapter audio (proxied). */

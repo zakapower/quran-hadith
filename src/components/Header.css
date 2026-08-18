@@ -94,6 +94,7 @@
 
 .ctrl.site-controls__burger {
   display: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ctrl {
@@ -406,7 +407,7 @@
     border: 1px solid var(--line);
     border-radius: 0.85rem;
     background: var(--surface);
-    box-shadow: 0 12px 28px color-mix(in srgb, var(--ink) 14%, transparent);
+    box-shadow: none;
   }
 
   .site-menu .settings__panel {

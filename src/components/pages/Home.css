@@ -43,7 +43,7 @@
 }
 
 .hero__brand {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.95rem;
   font-family: var(--font-display);
   font-size: clamp(2.1rem, 6.5vw, 3.15rem);
   font-weight: 700;
@@ -51,22 +51,11 @@
   line-height: 0.95;
 }
 
-.hero h1 {
-  margin: 0 0 0.4rem;
-  font-family: var(--font-display);
-  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  text-wrap: balance;
-}
-
 .hero__lead {
   margin: 0 0 1.1rem;
-  max-width: 34rem;
   color: var(--muted);
   font-size: 1.05rem;
-  line-height: 1.55;
+  line-height: 1.4;
 }
 
 .hero__actions {
@@ -87,7 +76,10 @@
   font-weight: 600;
   font-size: 0.95rem;
   border: 1px solid transparent;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .btn--ghost {
@@ -95,15 +87,9 @@
   color: var(--ink);
   border-color: var(--line);
   transition:
-    transform 0.15s ease,
     filter 0.15s ease,
     border-color 0.15s ease,
     color 0.15s ease;
-}
-
-.btn:active {
-  transform: translateY(1px);
-  filter: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -130,7 +116,7 @@
 
 .home-surahs__title-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 0.4rem;
@@ -143,12 +129,11 @@
   letter-spacing: -0.03em;
 }
 
-.home-surahs__title-row a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
+.home-surahs__all {
   flex-shrink: 0;
+  padding: 0.4rem 0.85rem;
+  min-height: 2.2rem;
+  font-size: 0.88rem;
 }
 
 .home-surahs__head p {
@@ -211,18 +196,13 @@
       1.5rem max(1rem, env(safe-area-inset-left, 0px));
   }
 
-  .hero__lead {
-    font-size: 0.98rem;
-    margin-bottom: 1.35rem;
-  }
-
   .hero__actions {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
   }
 
-  .btn {
+  .hero__actions .btn {
     justify-content: center;
     min-height: 2.75rem;
     padding: 0.85rem 1.1rem;
