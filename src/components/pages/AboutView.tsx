@@ -1,7 +1,6 @@
 'use client'
 
 import { useApp } from '@/context/AppContext'
-import './List.css'
 import './About.css'
 
 const GITHUB_URL = 'https://github.com/zakapower/quran-hadith'
@@ -10,10 +9,10 @@ export function AboutView() {
   const { t } = useApp()
 
   return (
-    <div className="list-page about-page">
-      <header className="list-page__head">
+    <article className="about">
+      <header className="about__head">
         <h1>{t('О проекте', 'About')}</h1>
-        <p>
+        <p className="about__lead">
           {t(
             'Зачем нужен Tilāwah и как им пользоваться.',
             'What Tilāwah is for and how to use it.',
@@ -21,7 +20,7 @@ export function AboutView() {
         </p>
       </header>
 
-      <div className="about-prose">
+      <div className="about__prose">
         <section>
           <h2>{t('Что это', 'What this is')}</h2>
           <p>
@@ -171,6 +170,6 @@ export function AboutView() {
           </p>
         </section>
       </div>
-    </div>
+    </article>
   )
 }
