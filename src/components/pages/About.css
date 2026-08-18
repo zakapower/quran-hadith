@@ -1,8 +1,12 @@
+.about-page {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
 .about-prose {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  max-width: 40rem;
 }
 
 .about-prose section h2 {
