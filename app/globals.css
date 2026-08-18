@@ -83,13 +83,7 @@ body {
   font-size: 17px;
   line-height: 1.55;
   color: var(--ink);
-  background:
-    radial-gradient(
-      80% 50% at 100% 0%,
-      color-mix(in srgb, var(--wash) 70%, transparent),
-      transparent 60%
-    ),
-    var(--bg);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 18%, transparent);
 }

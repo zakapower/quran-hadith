@@ -130,10 +130,18 @@
 }
 
 .home-surahs__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
   flex-shrink: 0;
-  padding: 0.4rem 0.85rem;
+  padding: 0.4rem 0.7rem 0.4rem 0.85rem;
   min-height: 2.2rem;
   font-size: 0.88rem;
+}
+
+.home-surahs__all-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .home-surahs__head p {

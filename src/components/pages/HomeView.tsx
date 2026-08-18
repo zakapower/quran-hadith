@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import type { SurahMeta } from '@/data/types'
 import { surahMeaningRu, surahTitleRu } from '@/data/surahNamesRu'
 import { useRestoreListScroll } from '@/hooks/useRestoreListScroll'
@@ -39,7 +40,8 @@ export function HomeView({ surahs }: { surahs: SurahMeta[] }) {
           <div className="home-surahs__title-row">
             <h2 id="home-surahs-title">{t('Суры', 'Surahs')}</h2>
             <Link className="btn btn--ghost home-surahs__all" href="/quran">
-              {t('Все →', 'All →')}
+              {t('Все', 'All')}
+              <ChevronRight className="home-surahs__all-icon" strokeWidth={2.25} aria-hidden />
             </Link>
           </div>
           <p>
