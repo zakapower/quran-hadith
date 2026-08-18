@@ -18,8 +18,8 @@ export function HadithListView() {
         <h1>{t('Хадисы', 'Hadith')}</h1>
         <p>
           {t(
-            'Сахих аль-Бухари и Сахих Муслим.',
-            'Sahih al-Bukhari and Sahih Muslim.',
+            'Сахих аль-Бухари, Сахих Муслим и четыре сунана.',
+            'Sahih al-Bukhari, Sahih Muslim, and the four Sunan.',
           )}
         </p>
       </header>

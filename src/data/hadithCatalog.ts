@@ -37,6 +37,75 @@ export const hadithCollections: HadithCollectionMeta[] = [
       ru: 'rus-muslim',
     },
   },
+  {
+    id: 'abudawud',
+    title: {
+      ru: 'Сунан Абу Дауд',
+      en: 'Sunan Abu Dawud',
+    },
+    narrator: {
+      ru: 'Имам Абу Дауд',
+      en: 'Imam Abu Dawud',
+    },
+    apiBook: 'abudawud',
+    hadithCount: 5274,
+    editions: {
+      ar: 'ara-abudawud',
+      en: 'eng-abudawud',
+      ru: 'rus-abudawud',
+    },
+  },
+  {
+    id: 'tirmidhi',
+    title: {
+      ru: 'Сунан ат-Тирмизи',
+      en: 'Sunan at-Tirmidhi',
+    },
+    narrator: {
+      ru: 'Имам ат-Тирмизи',
+      en: 'Imam at-Tirmidhi',
+    },
+    apiBook: 'tirmidhi',
+    hadithCount: 3956,
+    editions: {
+      ar: 'ara-tirmidhi',
+      en: 'eng-tirmidhi',
+    },
+  },
+  {
+    id: 'nasai',
+    title: {
+      ru: 'Сунан ан-Насаи',
+      en: 'Sunan an-Nasa’i',
+    },
+    narrator: {
+      ru: 'Имам ан-Насаи',
+      en: 'Imam an-Nasa’i',
+    },
+    apiBook: 'nasai',
+    hadithCount: 5758,
+    editions: {
+      ar: 'ara-nasai',
+      en: 'eng-nasai',
+    },
+  },
+  {
+    id: 'ibnmajah',
+    title: {
+      ru: 'Сунан ибн Маджа',
+      en: 'Sunan Ibn Majah',
+    },
+    narrator: {
+      ru: 'Имам ибн Маджа',
+      en: 'Imam Ibn Majah',
+    },
+    apiBook: 'ibnmajah',
+    hadithCount: 4341,
+    editions: {
+      ar: 'ara-ibnmajah',
+      en: 'eng-ibnmajah',
+    },
+  },
 ]
 
 export function getHadithCollection(id: string) {

@@ -28,8 +28,8 @@ export interface HadithCollectionMeta {
   id: string
   title: { ru: string; en: string }
   narrator: { ru: string; en: string }
-  /** CDN book key: bukhari | muslim */
-  apiBook: 'bukhari' | 'muslim'
+  /** CDN book key in fawazahmed0/hadith-api */
+  apiBook: 'bukhari' | 'muslim' | 'abudawud' | 'tirmidhi' | 'nasai' | 'ibnmajah'
   /** Число хадисов в издании CDN (для списка без лишнего запроса) */
   hadithCount: number
   editions: {

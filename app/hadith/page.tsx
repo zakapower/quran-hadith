@@ -9,8 +9,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = pageTitle(tab)
   const description =
     lang === 'ru'
-      ? 'Сахих аль-Бухари и Сахих Муслим.'
-      : 'Sahih al-Bukhari and Sahih Muslim.'
+      ? 'Сахих аль-Бухари, Сахих Муслим и четыре сунана.'
+      : 'Sahih al-Bukhari, Sahih Muslim, and the four Sunan.'
 
   return {
     title: tab,
