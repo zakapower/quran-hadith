@@ -21,6 +21,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|fonts|favicon\\.svg|favicon-dark\\.svg|favicon-light\\.svg|icons/|sw\\.js$|swe-worker).*)',
+    '/((?!_next/static|_next/image|fonts|favicon\\.svg|icons/|sw\\.js$|swe-worker).*)',
   ],
 }

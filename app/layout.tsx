@@ -38,8 +38,9 @@ export const metadata: Metadata = {
     title: 'Tilāwah',
     statusBarStyle: 'black-translucent',
   },
-  // Managed at runtime (theme); keep Next from injecting a fixed icon.
-  icons: {},
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+  },
 }
 
 export const viewport: Viewport = {
@@ -70,7 +71,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var th=localStorage.getItem('qh-theme');if(th!=='dark'&&th!=='light'){th='dark'}document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th;if(localStorage.getItem('qh-reduce-motion')==='1'){document.documentElement.setAttribute('data-reduce-motion','1')}var href=th==='dark'?'/favicon-dark.svg?v=5':'/favicon-light.svg?v=5';document.querySelectorAll("link[rel='icon'],link[rel='shortcut icon']").forEach(function(n){n.remove()});var link=document.createElement('link');link.id='site-favicon';link.rel='icon';link.type='image/svg+xml';link.href=href;document.head.appendChild(link);var coarse=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;var touch=('ontouchstart' in window)||navigator.maxTouchPoints>0;if(coarse||touch){document.documentElement.setAttribute('data-touch','1')}var mark=function(){document.documentElement.setAttribute('data-touch','1')};window.addEventListener('touchstart',mark,{once:true,passive:true});window.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||e.pointerType==='pen')mark()},{once:true,passive:true})}catch(e){}})()`,
+            __html: `(function(){try{var th=localStorage.getItem('qh-theme');if(th!=='dark'&&th!=='light'){th='dark'}document.documentElement.setAttribute('data-theme',th);document.documentElement.style.colorScheme=th;if(localStorage.getItem('qh-reduce-motion')==='1'){document.documentElement.setAttribute('data-reduce-motion','1')}var coarse=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;var touch=('ontouchstart' in window)||navigator.maxTouchPoints>0;if(coarse||touch){document.documentElement.setAttribute('data-touch','1')}var mark=function(){document.documentElement.setAttribute('data-touch','1')};window.addEventListener('touchstart',mark,{once:true,passive:true});window.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||e.pointerType==='pen')mark()},{once:true,passive:true})}catch(e){}})()`,
           }}
         />
       </head>

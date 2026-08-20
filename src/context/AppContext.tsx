@@ -89,26 +89,6 @@ function writeLangCookie(lang: Lang) {
   document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=31536000; samesite=lax`
 }
 
-const FAVICON_V = '5'
-
-function applySiteFavicon(theme: Theme) {
-  const href =
-    theme === 'dark'
-      ? `/favicon-dark.svg?v=${FAVICON_V}`
-      : `/favicon-light.svg?v=${FAVICON_V}`
-
-  document
-    .querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
-    .forEach((node) => node.remove())
-
-  const link = document.createElement('link')
-  link.id = 'site-favicon'
-  link.rel = 'icon'
-  link.type = 'image/svg+xml'
-  link.href = `${href}&t=${Date.now()}`
-  document.head.appendChild(link)
-}
-
 export function AppProvider({
   children,
   initialLang,
@@ -149,7 +129,6 @@ export function AppProvider({
     } catch {
       /* ignore */
     }
-    applySiteFavicon(theme)
     if (!document.documentElement.classList.contains('theme-changing')) return
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
