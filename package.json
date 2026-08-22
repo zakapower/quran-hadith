@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate:hadith-sections": "node scripts/generate-hadith-sections-meta.mjs"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.13.0",

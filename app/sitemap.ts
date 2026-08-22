@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
+import { allHadithSectionPathParams } from '@/data/hadithSectionsMeta'
 import { hadithCollections } from '@/data/hadithCatalog'
-import { allHadithSectionPaths } from '@/lib/ssg'
 import { getSiteOrigin } from '@/lib/site'
 
 const STATIC_PATHS = ['/', '/quran', '/hadith', '/favorites', '/about'] as const
@@ -26,7 +26,7 @@ function entry(
   }
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const origin = getSiteOrigin()
   const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) =>
     entry(origin, path, path === '/' ? 1 : 0.8),
@@ -40,11 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries.push(entry(origin, `/hadith/${book.id}`, 0.75, 'monthly'))
   }
 
-  const sections = await allHadithSectionPaths()
-  for (const { id, sectionId } of sections) {
-    entries.push(
-      entry(origin, `/hadith/${id}/${sectionId}`, 0.6, 'monthly'),
-    )
+  for (const { id, sectionId } of allHadithSectionPathParams()) {
+    entries.push(entry(origin, `/hadith/${id}/${sectionId}`, 0.6, 'monthly'))
   }
 
   return entries

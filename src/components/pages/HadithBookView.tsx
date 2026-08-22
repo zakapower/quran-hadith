@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { fetchHadithSections, peekHadithSections, seedHadithSections } from '@/api/hadith'
+import { fetchHadithSections, peekHadithSections, prefetchHadithBookSections, prefetchHadithSection, seedHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithSectionMeta } from '@/data/types'
 import { ReaderSkeleton } from '@/components/ReaderSkeleton'
@@ -75,6 +75,15 @@ export function HadithBookView({
       cancelled = true
     }
   }, [book, lang, initialByLang])
+
+  useEffect(() => {
+    if (!book || !sections?.length) return
+    prefetchHadithBookSections(
+      book.id,
+      lang,
+      sections.map((s) => s.id),
+    )
+  }, [book, lang, sections])
 
   const hadithNum = useMemo(() => parseHadithNumber(query), [query])
 
@@ -203,6 +212,9 @@ export function HadithBookView({
             <li key={s.id} id={`hadith-section-${book.id}-${s.id}`}>
               <Link
                 href={`/hadith/${book.id}/${s.id}`}
+                onPointerEnter={() =>
+                  prefetchHadithSection(book.id, s.id, lang)
+                }
                 onClick={() => {
                   saveListScroll(`/hadith/${book.id}`)
                   saveLastHadith(book.id, s.id)

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { fetchHadithSection, fetchHadithSections, peekHadithSection, peekHadithSections, prefetchNearbyHadithSections, seedHadithSection, seedHadithSections } from '@/api/hadith'
+import { fetchHadithSection, fetchHadithSections, peekHadithSection, peekHadithSections, prefetchHadithSection, prefetchNearbyHadithSections, seedHadithSection, seedHadithSections } from '@/api/hadith'
 import { getHadithCollection } from '@/data/hadithCatalog'
 import type { HadithItem, HadithSectionMeta } from '@/data/types'
 import { CopyQuoteButton } from '@/components/CopyQuoteButton'
@@ -37,6 +37,7 @@ function HadithSectionNav({
   index,
   total,
   top = false,
+  lang,
 }: {
   bookId: string
   prevId: string | null
@@ -44,6 +45,7 @@ function HadithSectionNav({
   index: number
   total: number
   top?: boolean
+  lang: 'ru' | 'en'
 }) {
   const { t } = useApp()
   return (
@@ -55,6 +57,7 @@ function HadithSectionNav({
         <Link
           className="reader__nav-btn"
           href={`/hadith/${bookId}/${prevId}`}
+          onPointerEnter={() => prefetchHadithSection(bookId, prevId, lang)}
           aria-label={t('Предыдущая глава', 'Previous chapter')}
           title={t('Предыдущая глава', 'Previous chapter')}
         >
@@ -70,6 +73,7 @@ function HadithSectionNav({
         <Link
           className="reader__nav-btn"
           href={`/hadith/${bookId}/${nextId}`}
+          onPointerEnter={() => prefetchHadithSection(bookId, nextId, lang)}
           aria-label={t('Следующая глава', 'Next chapter')}
           title={t('Следующая глава', 'Next chapter')}
         >
@@ -191,25 +195,47 @@ export function HadithSectionView({
       return
     }
 
+    if (cachedSecs) {
+      const sec = cachedSecs.find((s) => s.id === sectionId)
+      setSections(cachedSecs)
+      setTitle(sec?.name ?? sectionId)
+    } else {
+      setSections(null)
+    }
     setHadiths(null)
-    setSections(null)
 
-    Promise.all([
-      fetchHadithSections(book.id, lang),
-      fetchHadithSection(book.id, sectionId, lang),
-    ])
-      .then(([secs, items]) => {
+    const loads: Promise<void>[] = []
+
+    if (!cachedSecs) {
+      loads.push(
+        fetchHadithSections(book.id, lang).then((secs) => {
+          if (cancelled) return
+          const sec = secs.find((s) => s.id === sectionId)
+          setSections(secs)
+          setTitle(sec?.name ?? sectionId)
+        }),
+      )
+    }
+
+    loads.push(
+      fetchHadithSection(book.id, sectionId, lang).then((items) => {
         if (cancelled) return
-        const sec = secs.find((s) => s.id === sectionId)
-        setSections(secs)
-        setTitle(sec?.name ?? sectionId)
         setHadiths(items)
-        prefetchNearbyHadithSections(
-          book.id,
-          sectionId,
-          lang,
-          secs.map((s) => s.id),
-        )
+      }),
+    )
+
+    Promise.all(loads)
+      .then(() => {
+        if (cancelled) return
+        const secs = peekHadithSections(book.id, lang)
+        if (secs) {
+          prefetchNearbyHadithSections(
+            book.id,
+            sectionId,
+            lang,
+            secs.map((s) => s.id),
+          )
+        }
       })
       .catch(() => {
         if (!cancelled) setError('load-failed')
@@ -256,7 +282,16 @@ export function HadithSectionView({
           {t('Не удалось загрузить главу', 'Could not load chapter')}
         </p>
       )}
-      {!hadiths && !error && <ReaderSkeleton variant="hadith" />}
+      {!hadiths && !error && !title && <ReaderSkeleton variant="hadith" />}
+      {!hadiths && !error && title && sections && (
+        <>
+          <header className="reader__head">
+            <h1>{title}</h1>
+            <p className="reader__sub">{book.title[lang]}</p>
+          </header>
+          <ReaderSkeleton variant="hadith" />
+        </>
+      )}
 
       {hadiths && (
         <>
@@ -275,6 +310,7 @@ export function HadithSectionView({
             nextId={adjacent.nextId}
             index={adjacent.index}
             total={adjacent.total}
+            lang={lang}
             top
           />
 
@@ -335,6 +371,7 @@ export function HadithSectionView({
             nextId={adjacent.nextId}
             index={adjacent.index}
             total={adjacent.total}
+            lang={lang}
           />
         </>
       )}

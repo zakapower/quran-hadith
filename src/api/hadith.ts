@@ -1,5 +1,6 @@
 import type { HadithCollectionMeta, HadithItem, HadithSectionMeta, Lang } from '../data/types'
-import { getHadithCollection } from '../data/hadithCatalog'
+import { getHadithCollection, hadithCollections } from '../data/hadithCatalog'
+import { getHadithSectionsStatic } from '../data/hadithSectionsMeta'
 import { sectionNameRu } from '../data/hadithSectionsRu'
 import { translateEnToRuMany } from '../lib/translateEnRu'
 import { cacheGet, cacheSet, warmCache } from '../utils/pageCache'
@@ -7,28 +8,11 @@ import { normalizeHadithText } from '../utils/hadithText'
 
 const CDN = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1'
 const IMUSLIM = 'https://i-muslim.com/api/v1/translations/hadith'
-const INFO = `${CDN}/info.min.json`
 
 /** CDN has no rus-* — use i-muslim CC0 Russian as primary translation. */
 const IMUSLIM_PRIMARY_RU = new Set(['tirmidhi', 'nasai', 'ibnmajah'])
 /** CDN rus-* has gaps; fill empty slots from i-muslim authored Russian. */
 const IMUSLIM_GAP_RU = new Set(['abudawud'])
-
-type InfoBook = {
-  metadata?: {
-    name?: string
-    sections?: Record<string, string>
-    section_details?: Record<
-      string,
-      {
-        hadithnumber_first?: number
-        hadithnumber_last?: number
-        arabicnumber_first?: number
-        arabicnumber_last?: number
-      }
-    >
-  }
-}
 
 type ApiHadith = {
   hadithnumber: number
@@ -59,9 +43,6 @@ const SECTIONS_NS = 'hadith-sections'
 const SECTION_NS = 'hadith-section'
 const IMUSLIM_NS = 'imuslim-ru'
 
-let infoCache: Record<string, InfoBook> | null = null
-let infoPromise: Promise<Record<string, InfoBook>> | null = null
-
 const imuslimMaps = new Map<string, Map<number, string>>()
 const imuslimPromises = new Map<string, Promise<Map<number, string>>>()
 
@@ -69,26 +50,6 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { cache: 'force-cache', ...init })
   if (!res.ok) throw new Error(`Failed to load ${url}`)
   return (await res.json()) as T
-}
-
-async function getInfo() {
-  if (infoCache) return infoCache
-  const fromStore = cacheGet<Record<string, InfoBook>>('hadith-info', 'info')
-  if (fromStore) {
-    infoCache = fromStore
-    return infoCache
-  }
-  if (!infoPromise) {
-    // info.min.json > 2MB — Next data cache rejects it; dedupe in-flight fetches.
-    infoPromise = fetchJson<Record<string, InfoBook>>(INFO, {
-      cache: 'no-store',
-    }).then((data) => {
-      infoCache = data
-      cacheSet('hadith-info', 'info', data)
-      return data
-    })
-  }
-  return infoPromise
 }
 
 function translationLabel(col: HadithCollectionMeta, lang: Lang) {
@@ -125,7 +86,7 @@ async function getImuslimRuMap(bookId: string): Promise<Map<number, string>> {
   let pending = imuslimPromises.get(bookId)
   if (!pending) {
     pending = fetchJson<ImuslimPayload>(`${IMUSLIM}/${bookId}/ru`, {
-      cache: 'no-store',
+      cache: typeof window === 'undefined' ? 'no-store' : 'force-cache',
     }).then((payload) => {
       const map = new Map<number, string>()
       for (const item of payload.data?.items ?? []) {
@@ -202,42 +163,38 @@ export function peekHadithSection(
   return cacheGet<HadithItem[]>(SECTION_NS, sectionItemsKey(bookId, sectionId, lang))
 }
 
+function buildHadithSections(bookId: string, lang: Lang): HadithSectionMeta[] {
+  const col = getHadithCollection(bookId)
+  if (!col) throw new Error('Unknown collection')
+
+  const staticSections = getHadithSectionsStatic(col.apiBook)
+  if (!staticSections) throw new Error('Unknown collection')
+
+  return staticSections.map((s) => {
+    const count =
+      s.hadithLast >= s.hadithFirst && s.hadithFirst > 0
+        ? s.hadithLast - s.hadithFirst + 1
+        : 0
+    return {
+      id: s.id,
+      number: s.number,
+      name: lang === 'ru' ? sectionNameRu(bookId, s.id, s.en) : s.en,
+      hadithFirst: s.hadithFirst,
+      hadithLast: s.hadithLast,
+      count,
+    }
+  })
+}
+
 export async function fetchHadithSections(
   bookId: string,
   lang: Lang = 'en',
 ): Promise<HadithSectionMeta[]> {
-  const col = getHadithCollection(bookId)
-  if (!col) throw new Error('Unknown collection')
-
   const key = sectionsKey(bookId, lang)
   const cached = peekHadithSections(bookId, lang)
   if (cached) return cached
 
-  const info = await getInfo()
-  const meta = info[col.apiBook]?.metadata
-  const sections = meta?.sections ?? {}
-  const details = meta?.section_details ?? {}
-
-  const list = Object.entries(sections)
-    .map(([id, name]) => {
-      const n = Number(id)
-      const detail = details[id]
-      const first = detail?.hadithnumber_first ?? 0
-      const last = detail?.hadithnumber_last ?? 0
-      const count = last >= first && first > 0 ? last - first + 1 : 0
-      const enName = name || `${n}`
-      return {
-        id,
-        number: n,
-        name: lang === 'ru' ? sectionNameRu(bookId, id, enName) : enName,
-        hadithFirst: first,
-        hadithLast: last,
-        count,
-      }
-    })
-    .filter((s) => s.number > 0 && s.name.trim().length > 0)
-    .sort((a, b) => a.number - b.number)
-
+  const list = buildHadithSections(bookId, lang)
   cacheSet(SECTIONS_NS, key, list)
   return list
 }
@@ -362,4 +319,49 @@ export function prefetchNearbyHadithSections(
   const next = sectionIds[idx + 1]
   if (prev) warmCache(() => fetchHadithSection(bookId, prev, lang))
   if (next) warmCache(() => fetchHadithSection(bookId, next, lang))
+}
+
+/** Seed caches for all collections on the hadith list page. */
+export function warmHadithCatalog() {
+  for (const book of hadithCollections) {
+    warmCache(() => fetchHadithSections(book.id, 'ru'))
+    warmImuslimRu(book.id)
+  }
+}
+
+/** Warm Russian translation map for books that rely on i-muslim. */
+export function warmImuslimRu(bookId: string) {
+  if (!IMUSLIM_PRIMARY_RU.has(bookId) && !IMUSLIM_GAP_RU.has(bookId)) return
+  warmCache(() => getImuslimRuMap(bookId))
+}
+
+/** Prefetch chapter list for a collection. */
+export function prefetchHadithBook(bookId: string, lang: Lang) {
+  warmCache(() => fetchHadithSections(bookId, lang))
+  warmImuslimRu(bookId)
+}
+
+/** Prefetch a single chapter's hadiths. */
+export function prefetchHadithSection(
+  bookId: string,
+  sectionId: string,
+  lang: Lang,
+) {
+  warmCache(async () => {
+    await fetchHadithSections(bookId, lang)
+    await fetchHadithSection(bookId, sectionId, lang)
+  })
+}
+
+/** Prefetch the first few chapters after opening a book. */
+export function prefetchHadithBookSections(
+  bookId: string,
+  lang: Lang,
+  sectionIds: string[],
+  count = 4,
+) {
+  warmImuslimRu(bookId)
+  for (const id of sectionIds.slice(0, count)) {
+    warmCache(() => fetchHadithSection(bookId, id, lang))
+  }
 }
