@@ -95,9 +95,9 @@ function translationLabel(col: HadithCollectionMeta, lang: Lang) {
   if (lang !== 'ru') return col.editions.en
   if (col.editions.ru) {
     const gap = IMUSLIM_GAP_RU.has(col.id) ? '+imuslim' : ''
-    return `${col.editions.ru}${gap}+mtfill`
+    return `${col.editions.ru}${gap}+mtfill2`
   }
-  if (IMUSLIM_PRIMARY_RU.has(col.id)) return 'imuslim-ru+mtfill'
+  if (IMUSLIM_PRIMARY_RU.has(col.id)) return 'imuslim-ru+mtfill2'
   return col.editions.en
 }
 
@@ -149,11 +149,12 @@ async function buildRuMap(
   enMap: Map<number, string>,
   imuslim?: Map<number, string>,
 ): Promise<Map<number, string>> {
-  const result = new Map(primary)
-  if (imuslim) {
-    for (const [n, text] of imuslim) {
-      if (!result.has(n) && text) result.set(n, text)
-    }
+  // Only numbers from this Arabic section — never the whole-book imuslim map.
+  const result = new Map<number, string>()
+  for (const h of arabic) {
+    const n = h.hadithnumber
+    const text = primary.get(n) || imuslim?.get(n) || ''
+    if (text) result.set(n, text)
   }
 
   const missing: Array<{ n: number; en: string }> = []
@@ -183,20 +184,6 @@ function textMapFromHadiths(hadiths: ApiHadith[]): Map<number, string> {
     if (text) map.set(h.hadithnumber, text)
   }
   return map
-}
-
-function pickTranslation(
-  n: number,
-  primary: Map<number, string>,
-  ...fallbacks: Array<Map<number, string> | undefined>
-): string {
-  const fromPrimary = primary.get(n)
-  if (fromPrimary) return fromPrimary
-  for (const fb of fallbacks) {
-    const text = fb?.get(n)
-    if (text) return text
-  }
-  return ''
 }
 
 export function peekHadithSections(
@@ -257,29 +244,19 @@ export async function fetchHadithSections(
 function mapHadiths(
   bookId: string,
   arabic: ApiHadith[],
-  primary: Map<number, string>,
-  ...fallbacks: Array<Map<number, string> | undefined>
+  translations: Map<number, string>,
 ): HadithItem[] {
-  const arMap = new Map(arabic.map((h) => [h.hadithnumber, h]))
-  const numbers = [
-    ...new Set([
-      ...arMap.keys(),
-      ...primary.keys(),
-      ...fallbacks.flatMap((fb) => (fb ? [...fb.keys()] : [])),
-    ]),
-  ].sort((a, b) => a - b)
-
-  return numbers
-    .map((n) => {
-      const ar = arMap.get(n)
-      const arabicText = ar?.text ? normalizeHadithText(ar.text) : undefined
-      const text = pickTranslation(n, primary, ...fallbacks)
+  return arabic
+    .map((ar) => {
+      const n = ar.hadithnumber
+      const arabicText = ar.text ? normalizeHadithText(ar.text) : undefined
+      const text = translations.get(n) ?? ''
       return {
         id: `${bookId}-${n}`,
         number: n,
         arabic: arabicText || undefined,
         text,
-        reference: ar?.reference,
+        reference: ar.reference,
       }
     })
     .filter((h) => h.text || h.arabic)
