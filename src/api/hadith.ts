@@ -1,9 +1,9 @@
 import type { HadithCollectionMeta, HadithItem, HadithSectionMeta, Lang } from '../data/types'
 import { getHadithCollection } from '../data/hadithCatalog'
 import { sectionNameRu } from '../data/hadithSectionsRu'
+import { translateEnToRuMany } from '../lib/translateEnRu'
 import { cacheGet, cacheSet, warmCache } from '../utils/pageCache'
 import { normalizeHadithText } from '../utils/hadithText'
-import { translateEnToRuMany } from '../lib/translateEnRu'
 
 const CDN = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1'
 const IMUSLIM = 'https://i-muslim.com/api/v1/translations/hadith'
@@ -148,6 +148,7 @@ async function buildRuMap(
   primary: Map<number, string>,
   enMap: Map<number, string>,
   imuslim?: Map<number, string>,
+  translateBatch: (texts: string[]) => Promise<string[]> = translateEnToRuMany,
 ): Promise<Map<number, string>> {
   // Only numbers from this Arabic section — never the whole-book imuslim map.
   const result = new Map<number, string>()
@@ -168,7 +169,7 @@ async function buildRuMap(
   const BATCH = 40
   for (let i = 0; i < missing.length; i += BATCH) {
     const chunk = missing.slice(i, i + BATCH)
-    const translated = await translateEnToRuMany(chunk.map((c) => c.en))
+    const translated = await translateBatch(chunk.map((c) => c.en))
     for (let j = 0; j < chunk.length; j++) {
       const ru = normalizeHadithText(translated[j] || '')
       if (ru) result.set(chunk[j].n, ru)
@@ -266,9 +267,12 @@ export async function fetchHadithSection(
   bookId: string,
   sectionId: string,
   lang: Lang,
+  options?: { translateBatch?: (texts: string[]) => Promise<string[]> },
 ): Promise<HadithItem[]> {
   const col = getHadithCollection(bookId)
   if (!col) throw new Error('Unknown collection')
+
+  const translateBatch = options?.translateBatch ?? translateEnToRuMany
 
   const key = sectionItemsKey(bookId, sectionId, lang)
   const cached = peekHadithSection(bookId, sectionId, lang)
@@ -294,6 +298,7 @@ export async function fetchHadithSection(
       textMapFromHadiths(russian.hadiths ?? []),
       textMapFromHadiths(english.hadiths ?? []),
       imuslim,
+      translateBatch,
     )
     items = mapHadiths(bookId, arList, ruMap)
   } else if (lang === 'ru' && IMUSLIM_PRIMARY_RU.has(bookId)) {
@@ -307,6 +312,8 @@ export async function fetchHadithSection(
       arList,
       imuslim,
       textMapFromHadiths(english.hadiths ?? []),
+      undefined,
+      translateBatch,
     )
     items = mapHadiths(bookId, arList, ruMap)
   } else {

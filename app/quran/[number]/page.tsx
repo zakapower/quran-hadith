@@ -3,12 +3,15 @@ import { Suspense } from 'react'
 import { SurahView } from '@/components/pages/SurahView'
 import { fetchSurah } from '@/api/quran'
 import { getRequestLang } from '@/lib/request-lang'
+import { loadBothLangs, quranStaticParams } from '@/lib/ssg'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 import { surahTitleRu } from '@/data/surahNamesRu'
 import { getSurahMeta } from '@/data/surahList'
 
+export const dynamic = 'force-static'
+
 export function generateStaticParams() {
-  return Array.from({ length: 114 }, (_, i) => ({ number: String(i + 1) }))
+  return quranStaticParams()
 }
 
 export async function generateMetadata({
@@ -49,18 +52,13 @@ export default async function SurahPage({
 }) {
   const { number } = await params
   const n = Number(number)
-  let initialByLang: { ru?: Awaited<ReturnType<typeof fetchSurah>>; en?: Awaited<ReturnType<typeof fetchSurah>> } = {}
 
-  if (Number.isFinite(n) && n >= 1 && n <= 114) {
-    const [ru, en] = await Promise.all([
-      fetchSurah(n, 'ru').catch(() => null),
-      fetchSurah(n, 'en').catch(() => null),
-    ])
-    initialByLang = {
-      ...(ru ? { ru } : {}),
-      ...(en ? { en } : {}),
-    }
-  }
+  const initialByLang =
+    Number.isFinite(n) && n >= 1 && n <= 114
+      ? await loadBothLangs((lang) =>
+          fetchSurah(n, lang).catch(() => null),
+        )
+      : {}
 
   return (
     <Suspense fallback={null}>

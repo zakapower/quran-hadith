@@ -5,28 +5,21 @@ import {
   fetchHadithSection,
   fetchHadithSections,
 } from '@/api/hadith'
-import { getHadithCollection, hadithCollections } from '@/data/hadithCatalog'
+import { getHadithCollection } from '@/data/hadithCatalog'
 import { getRequestLang } from '@/lib/request-lang'
+import {
+  hadithSectionStaticParams,
+  loadBothLangs,
+} from '@/lib/ssg'
+import { translateEnToRuManyForBuild } from '@/lib/translateEnRuBuildCache'
 import { clipDescription, pageAlternates, pageTitle } from '@/lib/site'
 
 /** First visit builds HTML; then cached (ISR). Avoids huge Vercel builds. */
 export const revalidate = 86400
 export const dynamicParams = true
 
-/** Prefetch a few early chapters per book so common paths are warm. */
 export async function generateStaticParams() {
-  const params: Array<{ id: string; sectionId: string }> = []
-  for (const book of hadithCollections) {
-    try {
-      const sections = await fetchHadithSections(book.id, 'en')
-      for (const s of sections.slice(0, 8)) {
-        params.push({ id: book.id, sectionId: s.id })
-      }
-    } catch {
-      /* skip */
-    }
-  }
-  return params
+  return hadithSectionStaticParams()
 }
 
 export async function generateMetadata({
@@ -68,32 +61,26 @@ export default async function HadithSectionPage({
     title: string
   }
 
-  let initialByLang: Partial<Record<'ru' | 'en', Pack>> = {}
-
-  if (book) {
-    const load = async (lang: 'ru' | 'en'): Promise<Pack | null> => {
-      try {
+  const initialByLang = book
+    ? await loadBothLangs(async (lang): Promise<Pack | null> => {
+        try {
         const [sections, hadiths] = await Promise.all([
           fetchHadithSections(book.id, lang),
-          fetchHadithSection(book.id, sectionId, lang),
+          fetchHadithSection(book.id, sectionId, lang, {
+            translateBatch: translateEnToRuManyForBuild,
+          }),
         ])
-        const sec = sections.find((s) => s.id === sectionId)
-        return {
-          sections,
-          hadiths,
-          title: sec?.name ?? sectionId,
+          const sec = sections.find((s) => s.id === sectionId)
+          return {
+            sections,
+            hadiths,
+            title: sec?.name ?? sectionId,
+          }
+        } catch {
+          return null
         }
-      } catch {
-        return null
-      }
-    }
-
-    const [ru, en] = await Promise.all([load('ru'), load('en')])
-    initialByLang = {
-      ...(ru ? { ru } : {}),
-      ...(en ? { en } : {}),
-    }
-  }
+      })
+    : {}
 
   return (
     <Suspense fallback={null}>
