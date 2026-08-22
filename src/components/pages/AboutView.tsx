@@ -103,8 +103,8 @@ export function AboutView() {
           <h2>{t('Источники', 'Sources')}</h2>
           <p>
             {t(
-              'Тексты Корана и хадисов - из открытых quran-api и hadith-api (jsDelivr). Озвучка и тайминги слов - из API Quran.com.',
-              'Qur’an and Hadith texts come from the open quran-api and hadith-api (jsDelivr). Audio and word timings come from the Quran.com API.',
+              'Тексты Корана и хадисов - из открытых quran-api, hadith-api (jsDelivr) и i-muslim. Озвучка и тайминги слов - из API Quran.com.',
+              'Qur’an and Hadith texts come from the open quran-api, hadith-api (jsDelivr), and i-muslim. Audio and word timings come from the Quran.com API.',
             )}
           </p>
           <ul>
@@ -179,8 +179,8 @@ export function AboutView() {
             </li>
             <li>
               {t(
-                'Сунан ат-Тирмизи, Сунан ан-Насаи, Сунан ибн Маджа - EN: hadith-api (русского издания в API нет).',
-                'Sunan at-Tirmidhi, Sunan an-Nasa’i, Sunan Ibn Majah - EN: hadith-api (no Russian edition in the API).',
+                'Сунан ат-Тирмизи, Сунан ан-Насаи, Сунан ибн Маджа - RU: i-muslim (CC0); EN: hadith-api. Пропуски в RU при необходимости дополняются автопереводом с английского.',
+                'Sunan at-Tirmidhi, Sunan an-Nasa’i, Sunan Ibn Majah - RU: i-muslim (CC0); EN: hadith-api. Missing RU lines may be filled by auto-translation from English.',
               )}
             </li>
           </ul>
@@ -195,8 +195,8 @@ export function AboutView() {
           <h2>{t('Важно знать', 'Disclaimer')}</h2>
           <p>
             {t(
-              'Это не фетва и не замена учёному. Тексты - для личного чтения. В сложных вопросах лучше обратиться к знающему человеку.',
-              'This is not a fatwa and not a substitute for a scholar. The texts are for personal reading. For complex matters, ask a knowledgeable person.',
+              'Это не фетва и не замена учёному. Тексты - для личного чтения. Автоперевод хадисов (где нет готового RU) может быть неточным. В сложных вопросах лучше обратиться к знающему человеку.',
+              'This is not a fatwa and not a substitute for a scholar. The texts are for personal reading. Auto-translated hadith (where no RU edition exists) may be imprecise. For complex matters, ask a knowledgeable person.',
             )}
           </p>
         </div>

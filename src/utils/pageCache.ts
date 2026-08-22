@@ -7,7 +7,7 @@ const mem = new Map<string, unknown>()
 const MAX_KEYS = 96
 
 function storageKey(ns: string) {
-  return `tilawah-cache-v2:${ns}`
+  return `tilawah-cache-v3:${ns}`
 }
 
 function canUseStorage() {
